@@ -276,6 +276,127 @@
       font-family: 'Courier New', monospace;
     }
 
+    /* ── Settings Panel ─────────────────────────────────── */
+    .settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 90;
+    }
+    .settings-overlay.open { display: block; }
+
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 320px;
+      height: 100vh;
+      background: #faf9f6;
+      border-left: 3px solid #1a1a1a;
+      z-index: 100;
+      transition: right 0.28s ease;
+      overflow-y: auto;
+      padding: 0 0 40px;
+    }
+    .settings-panel.open { right: 0; }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a1a1a;
+      color: #faf9f6;
+      padding: 12px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .settings-header button {
+      background: none;
+      border: 1px solid #aaa;
+      color: #faf9f6;
+      font-size: 0.9rem;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .settings-section {
+      padding: 16px;
+      border-bottom: 1px solid #ddd;
+    }
+    .settings-section-title {
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    .settings-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .settings-slider-row input[type=range] {
+      flex: 1;
+      accent-color: #1a1a1a;
+      height: 4px;
+    }
+    .settings-slider-val {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    .settings-check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .settings-check-row:last-child { border-bottom: none; }
+    .settings-check-row input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      accent-color: #1a1a1a;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .settings-check-label {
+      font-size: 0.88rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .settings-check-count {
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      color: #bbb;
+      font-style: normal;
+    }
+
+    .settings-note {
+      padding: 14px 16px;
+      font-size: 0.75rem;
+      color: #999;
+      font-style: italic;
+      line-height: 1.5;
+      border-top: 1px solid #eee;
+    }
+    .settings-note a {
+      color: #888;
+    }
+
     /* ── Loading / Empty States ────────────────────────── */
     .loading, .empty-state {
       text-align: center;
@@ -363,7 +484,36 @@
     <button data-cat="health">Health / @foundmyfitness</button>
     <button id="btnPhotos" data-photos="on" style="margin-left:auto; border: 2px solid #1a1a1a; background:#1a1a1a; color:#faf9f6; font-size:0.8rem; font-weight:600; padding:5px 10px; opacity:0.85; cursor:pointer;">📷 PHOTOS: ON</button>
     <button id="btnReadAloud" style="border: 2px solid #1a1a1a; background:#fff; color:#1a1a1a; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">🔊 READ ALOUD</button>
+    <button id="btnSettings" style="border: 2px solid #555; background:#fff; color:#333; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">⚙ SETTINGS</button>
   </nav>
+
+  <!-- Settings Overlay + Panel -->
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <aside class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <span>⚙ Settings</span>
+      <button id="btnCloseSettings">✕ Close</button>
+    </div>
+
+    <!-- Stories per category -->
+    <div class="settings-section">
+      <div class="settings-section-title">Stories shown per category</div>
+      <div class="settings-slider-row">
+        <input type="range" id="settingCount" min="1" max="15" value="8" step="1">
+        <span class="settings-slider-val" id="settingCountVal">8</span>
+      </div>
+    </div>
+
+    <!-- Dynamic source sections (filled by JS) -->
+    <div id="settingsCities"></div>
+    <div id="settingsInternational"></div>
+    <div id="settingsInfluencers"></div>
+
+    <div class="settings-note">
+      Canada national news is always included.<br><br>
+      Changes to sources take effect on the <strong>next scrape</strong> (click ↺ Refresh or wait for the next scheduled run at 6 AM · 11 AM · 6 PM).
+    </div>
+  </aside>
 
   <!-- Main Content -->
   <main id="content">
@@ -380,6 +530,25 @@
   </div>
 
   <script>
+    // ── Settings (persisted in localStorage) ──
+    const SETTINGS_KEY = 'neutralnews_settings';
+    const defaultSettings = {
+      storyCount: 8,
+      enabledCats: { toronto: true, canada: true, international: true, health: true },
+    };
+    let settings = (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+        return saved ? Object.assign({}, defaultSettings, saved, {
+          enabledCats: Object.assign({}, defaultSettings.enabledCats, saved.enabledCats)
+        }) : { ...defaultSettings, enabledCats: { ...defaultSettings.enabledCats } };
+      } catch (e) { return { ...defaultSettings, enabledCats: { ...defaultSettings.enabledCats } }; }
+    })();
+
+    function saveSettings() {
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    }
+
     // ── State ──
     let currentCategory = 'all';
     let stories = [];
@@ -460,10 +629,12 @@
       });
 
       let html = '';
-      const cats = currentCategory === 'all' ? catOrder : [currentCategory];
+      const cats = currentCategory === 'all'
+        ? catOrder.filter(c => settings.enabledCats[c] !== false)
+        : [currentCategory];
 
       cats.forEach(cat => {
-        const catStories = grouped[cat];
+        const catStories = (grouped[cat] || []).slice(0, settings.storyCount);
         if (!catStories || catStories.length === 0) return;
 
         html += `<section class="category-section">`;
@@ -624,11 +795,136 @@
       }
     });
 
+    // ── Settings panel ──
+    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const settingCount = document.getElementById('settingCount');
+    const settingCountVal = document.getElementById('settingCountVal');
+
+    // sourceLibrary + serverSettings loaded from /api/settings on open
+    let sourceLibrary = null;
+    let serverSettings = null; // { cities:[], international:[], influencers:[] }
+
+    function buildSourceSection(containerId, title, libraryItems, enabledIds) {
+      const el = document.getElementById(containerId);
+      if (!libraryItems || libraryItems.length === 0) { el.innerHTML = ''; return; }
+
+      let html = `<div class="settings-section"><div class="settings-section-title">${title}</div>`;
+      for (const item of libraryItems) {
+        const checked = enabledIds.includes(item.id) ? 'checked' : '';
+        const sourceNames = item.sources.map(s => s.name).filter((v,i,a) => a.indexOf(v)===i).join(' · ');
+        html += `
+          <label class="settings-check-row">
+            <input type="checkbox" data-section="${containerId}" data-id="${item.id}" ${checked}>
+            <span class="settings-check-label">
+              ${item.label}
+              <span class="settings-check-count">${sourceNames}</span>
+            </span>
+          </label>`;
+      }
+      html += `</div>`;
+      el.innerHTML = html;
+
+      // Attach change listeners
+      el.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', () => onSourceToggle(cb));
+      });
+    }
+
+    function getEnabledIds(section) {
+      const container = document.getElementById(section);
+      const checked = [];
+      container.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
+        checked.push(cb.dataset.id);
+      });
+      return checked;
+    }
+
+    async function onSourceToggle(cb) {
+      const newSettings = {
+        storyCount: settings.storyCount,
+        cities: getEnabledIds('settingsCities'),
+        international: getEnabledIds('settingsInternational'),
+        influencers: getEnabledIds('settingsInfluencers'),
+      };
+      serverSettings = newSettings;
+      // Save to server
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+        });
+      } catch (e) { console.warn('Could not save settings to server'); }
+      statusRight.textContent = 'Source settings saved. Takes effect on next scrape.';
+    }
+
+    async function openSettings() {
+      settingsPanel.classList.add('open');
+      settingsOverlay.classList.add('open');
+
+      // Load library + settings from server if not yet loaded
+      if (!sourceLibrary) {
+        try {
+          const res = await fetch('/api/settings');
+          const data = await res.json();
+          sourceLibrary = data.library;
+          serverSettings = data.settings; // may be null (means use defaults)
+        } catch (e) {
+          console.warn('Could not load settings from server');
+          return;
+        }
+      }
+
+      // Build enabled id lists (server saved, or defaults)
+      const enabledCities = serverSettings?.cities ||
+        sourceLibrary.cities.filter(x => x.defaultEnabled).map(x => x.id);
+      const enabledIntl = serverSettings?.international ||
+        sourceLibrary.international.filter(x => x.defaultEnabled).map(x => x.id);
+      const enabledInfl = serverSettings?.influencers ||
+        sourceLibrary.influencers.filter(x => x.defaultEnabled).map(x => x.id);
+
+      settingCount.value = serverSettings?.storyCount || settings.storyCount;
+      settingCountVal.textContent = settingCount.value;
+
+      buildSourceSection('settingsCities',       'Canadian Cities',         sourceLibrary.cities,       enabledCities);
+      buildSourceSection('settingsInternational', 'International Regions',   sourceLibrary.international,enabledIntl);
+      buildSourceSection('settingsInfluencers',   'Health & Science Voices', sourceLibrary.influencers,  enabledInfl);
+    }
+
+    function closeSettings() {
+      settingsPanel.classList.remove('open');
+      settingsOverlay.classList.remove('open');
+    }
+
+    document.getElementById('btnSettings').addEventListener('click', openSettings);
+    document.getElementById('btnCloseSettings').addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', closeSettings);
+
+    // Stories-per-category slider
+    settingCount.addEventListener('input', async () => {
+      settings.storyCount = parseInt(settingCount.value, 10);
+      settingCountVal.textContent = settings.storyCount;
+      saveSettings();
+      renderStories();
+      // Also persist to server if serverSettings exists
+      if (serverSettings) {
+        serverSettings.storyCount = settings.storyCount;
+        try {
+          await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(serverSettings),
+          });
+        } catch (e) {}
+      }
+    });
+
     // ── Nav buttons ──
     document.getElementById('navBar').addEventListener('click', (e) => {
       if (e.target.tagName !== 'BUTTON') return;
-      if (e.target.id === 'btnPhotos' || e.target.id === 'btnReadAloud') return; // handled above
-      document.querySelectorAll('.nav-bar button:not(#btnPhotos):not(#btnReadAloud)').forEach(b => b.classList.remove('active'));
+      if (['btnPhotos', 'btnReadAloud', 'btnSettings'].includes(e.target.id)) return;
+      document.querySelectorAll('.nav-bar button:not(#btnPhotos):not(#btnReadAloud):not(#btnSettings)').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentCategory = e.target.dataset.cat;
       renderStories();
