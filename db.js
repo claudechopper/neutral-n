@@ -31,7 +31,8 @@ function migrate(db) {
       sources_json TEXT NOT NULL,        -- JSON array of {name, url}
       fingerprint TEXT NOT NULL UNIQUE,  -- dedup hash
       scraped_at TEXT NOT NULL,          -- ISO timestamp
-      scrape_date TEXT NOT NULL          -- YYYY-MM-DD for daily grouping
+      scrape_date TEXT NOT NULL,         -- YYYY-MM-DD for daily grouping
+      image_url TEXT                     -- photo from RSS feed (nullable)
     );
 
     CREATE INDEX IF NOT EXISTS idx_stories_date_cat
@@ -40,15 +41,22 @@ function migrate(db) {
     CREATE INDEX IF NOT EXISTS idx_stories_fingerprint
       ON stories(fingerprint);
   `);
+
+  // Add image_url column to existing databases that were created before this migration
+  try {
+    db.exec(`ALTER TABLE stories ADD COLUMN image_url TEXT;`);
+  } catch (e) {
+    // Column already exists — safe to ignore
+  }
 }
 
 // ── Insert a new story (ignores duplicates via fingerprint) ──
 function insertStory(story) {
   const stmt = getDb().prepare(`
     INSERT OR IGNORE INTO stories
-      (category, headline, summary, balanced_context, closing_line, sources_json, fingerprint, scraped_at, scrape_date)
+      (category, headline, summary, balanced_context, closing_line, sources_json, fingerprint, scraped_at, scrape_date, image_url)
     VALUES
-      (@category, @headline, @summary, @balanced_context, @closing_line, @sources_json, @fingerprint, @scraped_at, @scrape_date)
+      (@category, @headline, @summary, @balanced_context, @closing_line, @sources_json, @fingerprint, @scraped_at, @scrape_date, @image_url)
   `);
   return stmt.run(story);
 }

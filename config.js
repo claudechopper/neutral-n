@@ -3,8 +3,9 @@
 // ─────────────────────────────────────────────────────────
 
 module.exports = {
+  // ── Anthropic Claude API ───────────────────────────────
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
-anthropicModel: 'claude-haiku-4-5-20251001',
+  anthropicModel: 'claude-haiku-4-5-20251001',
 
   // ── Server ─────────────────────────────────────────────
   port: parseInt(process.env.PORT, 10) || 3000,
