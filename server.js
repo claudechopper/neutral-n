@@ -41,15 +41,10 @@ app.get('/api/dates', (req, res) => {
   }
 });
 
-// ── API: Trigger manual scrape ──
-app.post('/api/scrape', async (req, res) => {
-  try {
-    const newStories = await scrapeAll();
-    res.json({ success: true, newStories });
-  } catch (err) {
-    console.error('[API] Scrape error:', err.message);
-    res.status(500).json({ error: 'Scrape failed', message: err.message });
-  }
+// ── API: Trigger manual scrape (fire-and-forget) ──
+app.post('/api/scrape', (req, res) => {
+  res.json({ success: true, message: 'Scrape started. Stories will appear as they are processed.' });
+  scrapeAll().catch(err => console.error('[API] Scrape error:', err.message));
 });
 
 // ── API: Health check ──
