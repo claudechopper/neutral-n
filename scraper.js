@@ -4,6 +4,8 @@
 const Parser = require('rss-parser');
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { JSDOM } = require('jsdom');
 const crypto = require('crypto');
 const config = require('./config');
@@ -164,28 +166,12 @@ async function fetchSource(source) {
   return [];
 }
 
-// ── Fetch all sources for a category, with fallback ──
+// fetchCategory is superseded by buildActiveFeeds + fetchFeed, kept for compatibility
 async function fetchCategory(categoryKey) {
-  const catConfig = config.feeds[categoryKey];
-  if (!catConfig) return [];
-
-  let allItems = [];
-
-  for (const source of catConfig.sources) {
-    const items = await fetchSource(source);
-    allItems = allItems.concat(items);
-  }
-
-  // If we got nothing, try fallbacks
-  if (allItems.length === 0 && config.fallbackFeeds[categoryKey]) {
-    console.log(`  [INFO] Primary sources empty for ${categoryKey}, trying fallbacks...`);
-    for (const source of config.fallbackFeeds[categoryKey]) {
-      const items = await fetchSource(source);
-      allItems = allItems.concat(items);
-    }
-  }
-
-  return allItems;
+  const activeFeeds = buildActiveFeeds();
+  const feed = activeFeeds.find(f => f.key === categoryKey);
+  if (!feed) return [];
+  return fetchFeed(feed);
 }
 
 // ── Group similar stories across sources ──
@@ -228,6 +214,83 @@ function groupSimilarStories(items) {
   return groups;
 }
 
+// ── Build active feed list from user settings ─────────────
+function buildActiveFeeds() {
+  const lib = config.sourceLibrary;
+  let userSettings = null;
+  try {
+    const p = path.join(__dirname, 'data', 'user-settings.json');
+    if (fs.existsSync(p)) userSettings = JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (e) {}
+
+  const isEnabled = (section, id) => {
+    if (!userSettings) {
+      // No saved settings — use defaults from library
+      const item = lib[section] && lib[section].find(x => x.id === id);
+      return item ? item.defaultEnabled : false;
+    }
+    const list = userSettings[section] || [];
+    return list.includes(id);
+  };
+
+  const feeds = [];
+
+  // Cities → each enabled city becomes its own category
+  for (const city of lib.cities) {
+    if (isEnabled('cities', city.id)) {
+      feeds.push({ key: city.id, label: city.label, sources: city.sources });
+    }
+  }
+
+  // Canada national — always included (uses CBC, CTV, Globe national feeds)
+  feeds.push({
+    key: 'canada',
+    label: 'Canada',
+    sources: [
+      { name: 'CBC News',       url: 'https://www.cbc.ca/cmlink/rss-topstories', type: 'rss' },
+      { name: 'CTV News',       url: 'https://www.ctvnews.ca/rss/ctvnews-ca-top-stories-public-rss-1.822009', type: 'rss' },
+      { name: 'Globe and Mail', url: 'https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/', type: 'rss' },
+      { name: 'National Post',  url: 'https://nationalpost.com/feed', type: 'rss' },
+      { name: 'Global News CA', url: 'https://globalnews.ca/feed/', type: 'rss' },
+    ],
+  });
+
+  // International → pool ALL enabled regions into one category so stories
+  // cross-reference each other (e.g. Reuters vs Al Jazeera on the same event)
+  const intlSources = [];
+  for (const region of lib.international) {
+    if (isEnabled('international', region.id)) {
+      intlSources.push(...region.sources);
+    }
+  }
+  if (intlSources.length > 0) {
+    feeds.push({ key: 'international', label: 'International', sources: intlSources });
+  }
+
+  // Health influencers → pool ALL enabled influencers into one category
+  const healthSources = [];
+  for (const inf of lib.influencers) {
+    if (isEnabled('influencers', inf.id)) {
+      healthSources.push(...inf.sources);
+    }
+  }
+  if (healthSources.length > 0) {
+    feeds.push({ key: 'health', label: 'Health & Science', sources: healthSources });
+  }
+
+  return feeds;
+}
+
+// ── Fetch all items for a feed entry ─────────────────────
+async function fetchFeed(feedEntry) {
+  let allItems = [];
+  for (const source of feedEntry.sources) {
+    const items = await fetchSource(source);
+    allItems = allItems.concat(items);
+  }
+  return allItems;
+}
+
 // ── Main scrape function ──────────────────────────────────
 async function scrapeAll() {
   const now = new Date();
@@ -238,15 +301,17 @@ async function scrapeAll() {
   console.log(`SCRAPE STARTED — ${timestamp}`);
   console.log(`${'═'.repeat(60)}`);
 
-  const categories = Object.keys(config.feeds);
+  const activeFeeds = buildActiveFeeds();
+  console.log(`Active feeds: ${activeFeeds.map(f => f.label).join(', ')}`);
   let totalNew = 0;
 
-  for (const categoryKey of categories) {
-    const catLabel = config.feeds[categoryKey].label;
+  for (const feedEntry of activeFeeds) {
+    const categoryKey = feedEntry.key;
+    const catLabel = feedEntry.label;
     console.log(`\n── ${catLabel} ──`);
 
-    // 1. Fetch raw items from all sources
-    const rawItems = await fetchCategory(categoryKey);
+    // 1. Fetch raw items from all sources in this feed
+    const rawItems = await fetchFeed(feedEntry);
     console.log(`  Fetched ${rawItems.length} raw items`);
 
     if (rawItems.length === 0) {
@@ -293,6 +358,16 @@ async function scrapeAll() {
           // Use the first available image from any item in the group
           const imageUrl = group.map(i => i.imageUrl).find(u => !!u) || null;
 
+          // Use the earliest publish date from the group (most authoritative)
+          const pubDates = group
+            .map(i => i.pubDate)
+            .filter(Boolean)
+            .map(d => new Date(d))
+            .filter(d => !isNaN(d.getTime()));
+          const pubDate = pubDates.length > 0
+            ? new Date(Math.min(...pubDates.map(d => d.getTime()))).toISOString()
+            : null;
+
           db.insertStory({
             category: categoryKey,
             headline: summary.headline,
@@ -303,6 +378,7 @@ async function scrapeAll() {
             fingerprint: fp,
             scraped_at: timestamp,
             scrape_date: today,
+            pub_date: pubDate,
             image_url: imageUrl,
           });
 
