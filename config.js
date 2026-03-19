@@ -3,9 +3,8 @@
 // ─────────────────────────────────────────────────────────
 
 module.exports = {
-  // ── Google Gemini API ──────────────────────────────────
-  geminiApiKey: process.env.GOOGLE_API_KEY || '',
-  geminiModel: 'gemini-1.5-flash',
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+anthropicModel: 'claude-haiku-4-5-20251001',
 
   // ── Server ─────────────────────────────────────────────
   port: parseInt(process.env.PORT, 10) || 3000,
