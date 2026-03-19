@@ -1,0 +1,20 @@
+{
+  "name": "neutral-news",
+  "version": "1.0.0",
+  "description": "Balanced, ultra-concise news summaries — no bias, no clickbait, no hooks.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "scrape": "node scripts/scrape-now.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.11.0",
+    "better-sqlite3": "^11.7.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "jsdom": "^25.0.0",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0"
+  }
+}
