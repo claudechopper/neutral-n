@@ -30,7 +30,7 @@ Do NOT add any text outside the JSON object. No markdown fences. Just the JSON.`
 function geminiRequest(apiKey, model, systemPrompt, userMessage) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      system_instruction: {
+      systemInstruction: {
         parts: [{ text: systemPrompt }],
       },
       contents: [
