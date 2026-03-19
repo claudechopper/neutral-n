@@ -1,42 +1,17 @@
 // ─────────────────────────────────────────────────────────
-// summarizer.js — Gemini REST API (v1, no SDK dependency)
+// summarizer.js — Gemini REST API (v1, no SDK, no systemInstruction)
 // ─────────────────────────────────────────────────────────
 const https = require('https');
 const config = require('./config');
 
-const SYSTEM_PROMPT = `You are a neutral news summarizer. Your job is to produce ultra-concise, unbiased, factual summaries of news stories.
-
-RULES — follow these exactly:
-- 40 to 75 words maximum for the entire summary (headline + bullets + context + closing)
-- No opinions, no bias, no emotional language, no clickbait
-- No engagement hooks — the reader should feel informed and done
-- Never invent statistics or citations
-- Never state things as verified facts — frame as "reported by" or "according to"
-- If the story is naturally ongoing, note what's next. If it's finite, end it cleanly.
-- Tone: dry, matter-of-fact, human. Not robotic. Match the gravitas of the original story but strip any bias.
-- If only one source is available, that's fine — the summary should still be neutral.
-
-OUTPUT FORMAT — return ONLY valid JSON with these exact keys:
-{
-  "headline": "Clear, neutral, factual headline — one line, no clickbait",
-  "coreSummary": "• Bullet point 1 — what happened, key fact\\n• Bullet point 2 — additional key fact (if needed)",
-  "balancedContext": "• One or two bullet points naturally reflecting multiple perspectives without labeling sides",
-  "closingLine": "Single sentence: outcome, uncertainty, or what's next. Feels complete, not engaging."
-}
-
-Do NOT add any text outside the JSON object. No markdown fences. Just the JSON.`;
-
 // ── Direct HTTPS POST to Gemini REST API ──
-function geminiRequest(apiKey, model, systemPrompt, userMessage) {
+function geminiRequest(apiKey, model, prompt) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: systemPrompt }],
-      },
       contents: [
         {
           role: 'user',
-          parts: [{ text: userMessage }],
+          parts: [{ text: prompt }],
         },
       ],
       generationConfig: {
@@ -95,20 +70,33 @@ async function summarizeStory(storyGroup, categoryKey) {
 
   const categoryLabel = config.feeds[categoryKey]?.label || categoryKey;
 
-  const userMessage = `Category: ${categoryLabel}
+  const prompt = `You are a neutral news summarizer. Produce ultra-concise, unbiased, factual summaries.
 
-Here are ${storyGroup.length} source(s) covering this story:
+RULES:
+- 40 to 75 words maximum total (headline + bullets + context + closing combined)
+- No opinions, no bias, no emotional language, no clickbait, no engagement hooks
+- Never invent statistics or citations
+- Frame things as "reported by" or "according to" — not as verified facts
+- Tone: dry, matter-of-fact, human
+- Return ONLY valid JSON — no markdown fences, no extra text
+
+OUTPUT FORMAT (exactly these keys):
+{
+  "headline": "Clear, neutral, factual — one line, no clickbait",
+  "coreSummary": "• What happened, key fact\\n• Additional key fact if needed",
+  "balancedContext": "• One or two lines naturally reflecting multiple perspectives",
+  "closingLine": "Single sentence: outcome, uncertainty, or what happens next. No engagement hook."
+}
+
+---
+
+Category: ${categoryLabel}
 
 ${sourcesText}
 
-Summarize this into the required format. Remember: 40-75 words max total, neutral tone, no hooks. Return only valid JSON.`;
+Summarize the above into the JSON format. 40-75 words max total. Return only the JSON object.`;
 
-  const response = await geminiRequest(
-    apiKey,
-    config.geminiModel,
-    SYSTEM_PROMPT,
-    userMessage
-  );
+  const response = await geminiRequest(apiKey, config.geminiModel, prompt);
 
   const text = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
   if (!text) {
