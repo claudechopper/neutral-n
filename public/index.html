@@ -43,6 +43,18 @@
       margin-top: 4px;
     }
 
+    /* ── Mission Banner ────────────────────────────────── */
+    .mission-banner {
+      text-align: center;
+      font-size: 0.78rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.03em;
+      color: #faf9f6;
+      background: #1a1a1a;
+      padding: 6px 16px;
+      margin-bottom: 0;
+    }
+
     /* ── Nav / Filters ────────────────────────────────── */
     .nav-bar {
       display: flex;
@@ -136,11 +148,55 @@
       filter: grayscale(20%);
     }
 
+    /* ── AI Badge + Read Time ──────────────────────────── */
+    .story-meta-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: wrap;
+    }
+    .ai-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #faf9f6;
+      background: #1a1a1a;
+      padding: 2px 6px;
+      text-transform: uppercase;
+    }
+    .read-time {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem;
+      color: #aaa;
+      letter-spacing: 0.04em;
+    }
+
     .story-headline {
       font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       line-height: 1.3;
+    }
+
+    /* ── Section Labels ────────────────────────────────── */
+    .section-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 7px;
+      margin-bottom: 5px;
+      margin-top: 4px;
+    }
+    .section-label.first {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
     }
 
     .story-bullets {
@@ -151,11 +207,11 @@
     }
     .story-bullets li {
       margin-bottom: 3px;
-      list-style-type: '•  ';
+      list-style-type: '▸  ';
     }
 
     .story-context {
-      font-size: 0.84rem;
+      font-size: 0.85rem;
       color: #444;
       margin-bottom: 6px;
       padding-left: 14px;
@@ -166,24 +222,39 @@
       font-style: italic;
     }
 
+    /* ── Bottom Line ───────────────────────────────────── */
+    .bottom-line-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      border-top: 2px solid #1a1a1a;
+      padding-top: 7px;
+      margin-bottom: 4px;
+      margin-top: 4px;
+    }
     .story-closing {
-      font-size: 0.84rem;
-      color: #333;
-      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      line-height: 1.4;
     }
 
     .story-cta {
       font-size: 0.76rem;
-      color: #888;
-      background: #f0efec;
+      color: #c0392b;
+      background: #fff5f5;
       display: inline-block;
       padding: 3px 10px;
       text-decoration: none;
-      border: 1px solid #ddd;
+      border: 1px solid #e8b4b0;
     }
     .story-cta:hover {
-      background: #e8e7e4;
-      color: #555;
+      background: #fde8e6;
+      color: #922b21;
     }
 
     .story-sources {
@@ -274,9 +345,14 @@
   <!-- Masthead -->
   <header class="masthead">
     <h1>Neutral News</h1>
-    <div class="tagline">Balanced. Concise. No hooks.</div>
+    <div class="tagline">Both sides, every story · 30 seconds or less</div>
     <div class="date-line" id="dateLine"></div>
   </header>
+
+  <!-- Mission Banner -->
+  <div class="mission-banner">
+    No journalists. No editors. No agenda. Facts first, both sides always, then you decide.
+  </div>
 
   <!-- Category Filter -->
   <nav class="nav-bar" id="navBar">
@@ -285,6 +361,7 @@
     <button data-cat="canada">Canada</button>
     <button data-cat="international">International</button>
     <button data-cat="health">Health / @foundmyfitness</button>
+    <button id="btnPhotos" data-photos="on" style="margin-left:auto; border-style:dashed; font-size:0.75rem; opacity:0.7;">📷 Photos: ON</button>
   </nav>
 
   <!-- Main Content -->
@@ -402,7 +479,8 @@
           const contextBullets = story.balanced_context.split('\n').filter(l => l.trim());
 
           const storyNum = idx + 1;
-          const timestamp = formatTimestamp(story.scraped_at);
+          const timestamp = formatTimestamp(story.pub_date || story.scraped_at);
+          const timestampLabel = story.pub_date ? 'Published' : 'Scraped';
 
           html += `<article class="story">`;
 
@@ -410,19 +488,32 @@
           html += `  <div class="story-number">${storyNum}</div>`;
 
           html += `  <div class="story-body">`;
+
+          // AI badge + read time
+          html += `    <div class="story-meta-top">`;
+          html += `      <span class="ai-badge">Balanced Summary</span>`;
+          html += `      <span class="read-time">~30 sec read</span>`;
+          html += `    </div>`;
+
           // Photo (from RSS feed, if available)
           if (story.image_url) {
-            html += `    <img class="story-photo" src="${esc(story.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+            const photoStyle = photosOn ? '' : ' style="display:none"';
+            html += `    <img class="story-photo" src="${esc(story.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'"${photoStyle}>`;
           }
+
           html += `    <div class="story-headline">${esc(story.headline)}</div>`;
 
+          // WHAT HAPPENED
+          html += `    <div class="section-label first">◼ What Happened</div>`;
           html += `    <ul class="story-bullets">`;
           summaryBullets.forEach(b => {
-            html += `<li>${esc(b.replace(/^[•\-–]\s*/, ''))}</li>`;
+            html += `<li>${esc(b.replace(/^[•▸\-–]\s*/, ''))}</li>`;
           });
           html += `    </ul>`;
 
+          // OTHER PERSPECTIVES
           if (story.balanced_context) {
+            html += `    <div class="section-label">◼ Other Perspectives</div>`;
             html += `    <ul class="story-context">`;
             contextBullets.forEach(b => {
               html += `<li>${esc(b.replace(/^[•◦\-–]\s*/, ''))}</li>`;
@@ -430,11 +521,13 @@
             html += `    </ul>`;
           }
 
+          // THE BOTTOM LINE
           if (story.closing_line) {
+            html += `    <div class="bottom-line-label">◼ The Bottom Line</div>`;
             html += `    <div class="story-closing">${esc(story.closing_line)}</div>`;
           }
 
-          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. The rest is optional &rsaquo;</a>`;
+          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. Anymore is optional ✕</a>`;
 
           html += `    <div class="story-sources">Sources: `;
           html += sources.map(s =>
@@ -443,7 +536,7 @@
           html += `</div>`;
 
           if (timestamp) {
-            html += `    <div class="story-timestamp">Scraped ${timestamp}</div>`;
+            html += `    <div class="story-timestamp">${timestampLabel} ${timestamp}</div>`;
           }
 
           html += `  </div>`; // .story-body
@@ -463,10 +556,24 @@
       return el.innerHTML;
     }
 
+    // ── Photo toggle ──
+    let photosOn = true;
+    const btnPhotos = document.getElementById('btnPhotos');
+    btnPhotos.addEventListener('click', () => {
+      photosOn = !photosOn;
+      btnPhotos.dataset.photos = photosOn ? 'on' : 'off';
+      btnPhotos.textContent = `📷 Photos: ${photosOn ? 'ON' : 'OFF'}`;
+      // Show/hide all photo elements without re-rendering
+      document.querySelectorAll('.story-photo').forEach(img => {
+        img.style.display = photosOn ? 'block' : 'none';
+      });
+    });
+
     // ── Nav buttons ──
     document.getElementById('navBar').addEventListener('click', (e) => {
       if (e.target.tagName !== 'BUTTON') return;
-      document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
+      if (e.target.id === 'btnPhotos') return; // handled above
+      document.querySelectorAll('.nav-bar button:not(#btnPhotos)').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentCategory = e.target.dataset.cat;
       renderStories();
