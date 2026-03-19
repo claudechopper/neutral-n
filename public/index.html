@@ -345,13 +345,13 @@
   <!-- Masthead -->
   <header class="masthead">
     <h1>Neutral News</h1>
-    <div class="tagline">Both sides, every story · 30 seconds or less</div>
+    <div class="tagline">What matters, nothing more</div>
     <div class="date-line" id="dateLine"></div>
   </header>
 
   <!-- Mission Banner -->
   <div class="mission-banner">
-    No journalists. No editors. No agenda. Facts first, both sides always, then you decide.
+    No agenda. Always Facts first, BOTH sides EVERY story. 30 seconds
   </div>
 
   <!-- Category Filter -->
@@ -361,7 +361,8 @@
     <button data-cat="canada">Canada</button>
     <button data-cat="international">International</button>
     <button data-cat="health">Health / @foundmyfitness</button>
-    <button id="btnPhotos" data-photos="on" style="margin-left:auto; border-style:dashed; font-size:0.75rem; opacity:0.7;">📷 Photos: ON</button>
+    <button id="btnPhotos" data-photos="on" style="margin-left:auto; border: 2px solid #1a1a1a; background:#1a1a1a; color:#faf9f6; font-size:0.8rem; font-weight:600; padding:5px 10px; opacity:0.85; cursor:pointer;">📷 PHOTOS: ON</button>
+    <button id="btnReadAloud" style="border: 2px solid #1a1a1a; background:#fff; color:#1a1a1a; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">🔊 READ ALOUD</button>
   </nav>
 
   <!-- Main Content -->
@@ -527,7 +528,7 @@
             html += `    <div class="story-closing">${esc(story.closing_line)}</div>`;
           }
 
-          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. Anymore is optional ✕</a>`;
+          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. Go deeper if you really need <span style="font-style:italic; color:#e74c3c;">here</span> ✕</a>`;
 
           html += `    <div class="story-sources">Sources: `;
           html += sources.map(s =>
@@ -562,18 +563,72 @@
     btnPhotos.addEventListener('click', () => {
       photosOn = !photosOn;
       btnPhotos.dataset.photos = photosOn ? 'on' : 'off';
-      btnPhotos.textContent = `📷 Photos: ${photosOn ? 'ON' : 'OFF'}`;
+      btnPhotos.textContent = `📷 PHOTOS: ${photosOn ? 'ON' : 'OFF'}`;
       // Show/hide all photo elements without re-rendering
       document.querySelectorAll('.story-photo').forEach(img => {
         img.style.display = photosOn ? 'block' : 'none';
       });
     });
 
+    // ── Text-to-speech ──
+    let isReading = false;
+    const btnReadAloud = document.getElementById('btnReadAloud');
+    const synth = window.speechSynthesis;
+
+    btnReadAloud.addEventListener('click', () => {
+      if (isReading) {
+        synth.cancel();
+        isReading = false;
+        btnReadAloud.textContent = '🔊 READ ALOUD';
+        btnReadAloud.style.background = '#fff';
+        btnReadAloud.style.color = '#1a1a1a';
+        statusRight.textContent = '';
+      } else {
+        if (stories.length === 0) {
+          alert('No stories to read.');
+          return;
+        }
+
+        isReading = true;
+        btnReadAloud.textContent = '⏸ PAUSE';
+        btnReadAloud.style.background = '#1a1a1a';
+        btnReadAloud.style.color = '#faf9f6';
+        statusRight.textContent = 'Reading aloud...';
+
+        // Build full text from all visible stories
+        let fullText = 'Neutral News. ';
+        stories.forEach((story, i) => {
+          fullText += `Story ${i + 1}. `;
+          fullText += story.headline + '. ';
+          fullText += story.summary.replace(/\n/g, ' ') + '. ';
+          if (story.balanced_context) {
+            fullText += 'Other perspectives. ' + story.balanced_context.replace(/\n/g, ' ') + '. ';
+          }
+          fullText += story.closing_line + '. ';
+        });
+
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        utterance.onend = () => {
+          isReading = false;
+          btnReadAloud.textContent = '🔊 READ ALOUD';
+          btnReadAloud.style.background = '#fff';
+          btnReadAloud.style.color = '#1a1a1a';
+          statusRight.textContent = 'Done reading.';
+        };
+
+        synth.speak(utterance);
+      }
+    });
+
     // ── Nav buttons ──
     document.getElementById('navBar').addEventListener('click', (e) => {
       if (e.target.tagName !== 'BUTTON') return;
-      if (e.target.id === 'btnPhotos') return; // handled above
-      document.querySelectorAll('.nav-bar button:not(#btnPhotos)').forEach(b => b.classList.remove('active'));
+      if (e.target.id === 'btnPhotos' || e.target.id === 'btnReadAloud') return; // handled above
+      document.querySelectorAll('.nav-bar button:not(#btnPhotos):not(#btnReadAloud)').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentCategory = e.target.dataset.cat;
       renderStories();
