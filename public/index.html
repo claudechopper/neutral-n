@@ -323,8 +323,9 @@
       cursor: pointer;
     }
 
+    /* ── Settings: story count slider ─────────────────── */
     .settings-section {
-      padding: 16px;
+      padding: 14px 16px;
       border-bottom: 1px solid #ddd;
     }
     .settings-section-title {
@@ -334,67 +335,97 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #888;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
-
     .settings-slider-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      display: flex; align-items: center; gap: 12px;
     }
     .settings-slider-row input[type=range] {
-      flex: 1;
-      accent-color: #1a1a1a;
-      height: 4px;
+      flex: 1; accent-color: #1a1a1a; height: 4px;
     }
     .settings-slider-val {
       font-family: 'Courier New', monospace;
-      font-size: 1.1rem;
-      font-weight: 700;
-      min-width: 24px;
-      text-align: right;
+      font-size: 1.1rem; font-weight: 700; min-width: 24px; text-align: right;
     }
 
-    .settings-check-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
+    /* ── Accordion: Region ─────────────────────────────── */
+    .acc-region { border-bottom: 1px solid #ddd; }
+    .acc-region-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; cursor: pointer;
+      background: #ebebeb; user-select: none;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .acc-region-header:hover { background: #e2e2e0; }
+    .acc-region-body { display: none; }
+    .acc-region-body.open { display: block; }
+
+    /* ── Accordion: Country ────────────────────────────── */
+    .acc-country { border-bottom: 1px solid #eee; }
+    .acc-country-header {
+      display: flex; align-items: center;
+      padding: 7px 16px 7px 24px; gap: 8px;
+    }
+    .acc-country-label {
+      flex: 1; font-size: 0.85rem; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .acc-country-label input[type=checkbox] {
+      width: 15px; height: 15px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .acc-country-arrow {
+      font-size: 0.6rem; color: #999; cursor: pointer;
+      transition: transform 0.2s; user-select: none; padding: 2px 4px;
+    }
+    .acc-country-arrow.open { transform: rotate(90deg); }
+    .acc-country-cities {
+      display: none;
+      background: #f5f4f1;
+      padding: 4px 0;
+      border-top: 1px solid #e8e8e5;
+    }
+    .acc-country-cities.open { display: block; }
+
+    /* ── Accordion: City ───────────────────────────────── */
+    .acc-city-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 16px 6px 44px; font-size: 0.82rem;
       cursor: pointer;
+    }
+    .acc-city-row:hover { background: #eeede9; }
+    .acc-city-row input[type=checkbox] {
+      width: 14px; height: 14px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ── Settings: Arrow icon ──────────────────────────── */
+    .acc-arrow { transition: transform 0.2s; display: inline-block; }
+    .acc-arrow.open { transform: rotate(90deg); }
+
+    /* ── Settings: influencer rows ─────────────────────── */
+    .settings-check-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 16px; border-bottom: 1px solid #eee; cursor: pointer;
     }
     .settings-check-row:last-child { border-bottom: none; }
     .settings-check-row input[type=checkbox] {
-      width: 16px;
-      height: 16px;
-      accent-color: #1a1a1a;
-      cursor: pointer;
-      flex-shrink: 0;
+      width: 15px; height: 15px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0; margin-top: 2px;
     }
     .settings-check-label {
-      font-size: 0.88rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      font-size: 0.85rem; flex: 1;
+      display: flex; flex-direction: column; gap: 2px;
     }
     .settings-check-count {
-      font-family: 'Courier New', monospace;
-      font-size: 0.62rem;
-      color: #bbb;
-      font-style: normal;
+      font-family: 'Courier New', monospace; font-size: 0.6rem; color: #bbb;
     }
 
     .settings-note {
-      padding: 14px 16px;
-      font-size: 0.75rem;
-      color: #999;
-      font-style: italic;
-      line-height: 1.5;
-      border-top: 1px solid #eee;
-    }
-    .settings-note a {
-      color: #888;
+      padding: 14px 16px; font-size: 0.74rem; color: #999;
+      font-style: italic; line-height: 1.5;
     }
 
     /* ── Loading / Empty States ────────────────────────── */
@@ -478,10 +509,7 @@
   <!-- Category Filter -->
   <nav class="nav-bar" id="navBar">
     <button class="active" data-cat="all">All</button>
-    <button data-cat="toronto">Toronto</button>
-    <button data-cat="canada">Canada</button>
-    <button data-cat="international">International</button>
-    <button data-cat="health">Health / @foundmyfitness</button>
+    <!-- Dynamic category buttons injected here by JS -->
     <button id="btnPhotos" data-photos="on" style="margin-left:auto; border: 2px solid #1a1a1a; background:#1a1a1a; color:#faf9f6; font-size:0.8rem; font-weight:600; padding:5px 10px; opacity:0.85; cursor:pointer;">📷 PHOTOS: ON</button>
     <button id="btnReadAloud" style="border: 2px solid #1a1a1a; background:#fff; color:#1a1a1a; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">🔊 READ ALOUD</button>
     <button id="btnSettings" style="border: 2px solid #555; background:#fff; color:#333; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">⚙ SETTINGS</button>
@@ -504,14 +532,22 @@
       </div>
     </div>
 
-    <!-- Dynamic source sections (filled by JS) -->
-    <div id="settingsCities"></div>
-    <div id="settingsInternational"></div>
+    <!-- Accordion source tree (built by JS) -->
+    <div class="settings-section" style="padding:10px 16px 6px;">
+      <div class="settings-section-title">News Sources — Region › Country › City</div>
+    </div>
+    <div id="settingsAccordion"><div style="padding:20px 16px;font-size:0.8rem;color:#aaa;">Loading sources…</div></div>
+
+    <!-- Health & Science -->
+    <div class="settings-section" style="padding:10px 16px 6px; margin-top:4px;">
+      <div class="settings-section-title">Health & Science Voices</div>
+    </div>
     <div id="settingsInfluencers"></div>
 
     <div class="settings-note">
-      Canada national news is always included.<br><br>
-      Changes to sources take effect on the <strong>next scrape</strong> (click ↺ Refresh or wait for the next scheduled run at 6 AM · 11 AM · 6 PM).
+      Canada national news is always included.<br>
+      International always includes Reuters, AP, BBC &amp; Al Jazeera.<br><br>
+      Changes take effect on the <strong>next scrape</strong> (↺ Refresh or next scheduled run at 6 AM · 11 AM · 6 PM).
     </div>
   </aside>
 
@@ -552,6 +588,98 @@
     // ── State ──
     let currentCategory = 'all';
     let stories = [];
+
+    // ── Category label map (fallback: capitalize key) ──
+    const CAT_LABELS = {
+      // Canada
+      canada: 'Canada', toronto: 'Toronto', vancouver: 'Vancouver',
+      montreal: 'Montréal', calgary: 'Calgary', edmonton: 'Edmonton',
+      ottawa: 'Ottawa', winnipeg: 'Winnipeg', halifax: 'Halifax',
+      // USA
+      usa: 'United States', new_york: 'New York', los_angeles: 'Los Angeles',
+      chicago: 'Chicago', houston: 'Houston', washington_dc: 'Washington D.C.',
+      san_francisco: 'San Francisco', miami: 'Miami', boston: 'Boston',
+      seattle: 'Seattle', denver: 'Denver',
+      // UK
+      uk: 'United Kingdom', london: 'London', manchester: 'Manchester', edinburgh: 'Edinburgh',
+      // Europe
+      france: 'France', paris: 'Paris', germany: 'Germany', berlin: 'Berlin',
+      spain: 'Spain', madrid: 'Madrid', italy: 'Italy', rome: 'Rome',
+      netherlands: 'Netherlands', amsterdam: 'Amsterdam',
+      // Asia-Pacific
+      australia: 'Australia', sydney: 'Sydney', melbourne: 'Melbourne',
+      japan: 'Japan', tokyo: 'Tokyo', south_korea: 'South Korea', seoul: 'Seoul',
+      india: 'India', mumbai: 'Mumbai', delhi: 'Delhi',
+      china: 'China', beijing: 'Beijing', shanghai: 'Shanghai',
+      singapore: 'Singapore', hong_kong: 'Hong Kong', new_zealand: 'New Zealand',
+      // Middle East & Africa
+      uae: 'UAE', dubai: 'Dubai', israel: 'Israel', south_africa: 'South Africa',
+      nigeria: 'Nigeria', kenya: 'Kenya', egypt: 'Egypt',
+      // Latin America
+      brazil: 'Brazil', sao_paulo: 'São Paulo', mexico: 'Mexico',
+      mexico_city: 'Mexico City', argentina: 'Argentina', buenos_aires: 'Buenos Aires',
+      colombia: 'Colombia', bogota: 'Bogotá',
+      // Always-present
+      international: 'International',
+      health: 'Health & Science',
+    };
+
+    function catLabel(key) {
+      return CAT_LABELS[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // ── Preferred display order (known cats come first in this sequence) ──
+    const CAT_ORDER_PRIORITY = [
+      'canada', 'toronto', 'vancouver', 'montreal', 'calgary', 'edmonton',
+      'ottawa', 'winnipeg', 'halifax',
+      'usa', 'new_york', 'los_angeles', 'chicago', 'houston', 'washington_dc',
+      'san_francisco', 'miami', 'boston', 'seattle', 'denver',
+      'uk', 'london', 'manchester', 'edinburgh',
+      'france', 'paris', 'germany', 'berlin', 'spain', 'madrid', 'italy', 'rome',
+      'netherlands', 'amsterdam', 'australia', 'sydney', 'melbourne',
+      'japan', 'tokyo', 'south_korea', 'seoul', 'india', 'mumbai', 'delhi',
+      'china', 'beijing', 'shanghai', 'singapore', 'hong_kong', 'new_zealand',
+      'uae', 'dubai', 'israel', 'south_africa', 'nigeria', 'kenya', 'egypt',
+      'brazil', 'sao_paulo', 'mexico', 'mexico_city', 'argentina', 'buenos_aires',
+      'colombia', 'bogota',
+      'international', 'health',
+    ];
+
+    // ── Build nav buttons from actual story categories ──
+    function updateNavBar() {
+      const navBar = document.getElementById('navBar');
+      const utilityIds = new Set(['btnPhotos', 'btnReadAloud', 'btnSettings']);
+
+      // Remove old dynamic buttons
+      Array.from(navBar.querySelectorAll('button[data-cat]:not([data-cat="all"])')).forEach(b => b.remove());
+
+      // Unique categories present in stories
+      const present = [...new Set(stories.map(s => s.category))];
+      // Sort by priority order, unknowns appended alphabetically at end
+      present.sort((a, b) => {
+        const ia = CAT_ORDER_PRIORITY.indexOf(a);
+        const ib = CAT_ORDER_PRIORITY.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
+      // Insert before first utility button
+      const firstUtility = Array.from(navBar.children).find(el => utilityIds.has(el.id));
+      present.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.dataset.cat = cat;
+        btn.textContent = catLabel(cat);
+        if (cat === currentCategory) btn.classList.add('active');
+        navBar.insertBefore(btn, firstUtility);
+      });
+
+      // Ensure "All" is active if currentCategory is 'all'
+      if (currentCategory === 'all') {
+        navBar.querySelector('[data-cat="all"]')?.classList.add('active');
+      }
+    }
 
     // ── DOM refs ──
     const content = document.getElementById('content');
@@ -594,6 +722,7 @@
         const data = await res.json();
         stories = data.stories || [];
         dateLine.textContent = prettyDate(date);
+        updateNavBar();
         renderStories();
         statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
       } catch (err) {
@@ -615,23 +744,24 @@
 
       // Group by category
       const grouped = {};
-      const catOrder = ['toronto', 'canada', 'international', 'health'];
-      const catLabels = {
-        toronto: 'Toronto',
-        canada: 'Canada',
-        international: 'International',
-        health: 'Dr. Rhonda Patrick (@foundmyfitness)',
-      };
-
       stories.forEach(s => {
         if (!grouped[s.category]) grouped[s.category] = [];
         grouped[s.category].push(s);
       });
 
+      // Build ordered category list from what's actually present
+      const presentCats = Object.keys(grouped);
+      presentCats.sort((a, b) => {
+        const ia = CAT_ORDER_PRIORITY.indexOf(a);
+        const ib = CAT_ORDER_PRIORITY.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
       let html = '';
-      const cats = currentCategory === 'all'
-        ? catOrder.filter(c => settings.enabledCats[c] !== false)
-        : [currentCategory];
+      const cats = currentCategory === 'all' ? presentCats : [currentCategory];
 
       cats.forEach(cat => {
         const catStories = (grouped[cat] || []).slice(0, settings.storyCount);
@@ -639,7 +769,7 @@
 
         html += `<section class="category-section">`;
         if (currentCategory === 'all') {
-          html += `<h2 class="category-header">${catLabels[cat] || cat}</h2>`;
+          html += `<h2 class="category-header">${catLabel(cat)}</h2>`;
         }
 
         catStories.forEach((story, idx) => {
@@ -741,155 +871,227 @@
       });
     });
 
-    // ── Text-to-speech ──
+    // ── Text-to-speech (Chrome-bug-safe: queue one sentence at a time) ──
     let isReading = false;
+    let readQueue = [];
     const btnReadAloud = document.getElementById('btnReadAloud');
     const synth = window.speechSynthesis;
 
+    function stopReading() {
+      isReading = false;
+      readQueue = [];
+      synth.cancel();
+      btnReadAloud.textContent = '🔊 READ ALOUD';
+      btnReadAloud.style.background = '#fff';
+      btnReadAloud.style.color = '#1a1a1a';
+    }
+
+    function speakNext() {
+      if (!isReading || readQueue.length === 0) {
+        stopReading();
+        statusRight.textContent = readQueue.length === 0 && isReading ? 'Done reading.' : '';
+        return;
+      }
+      const text = readQueue.shift();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 0.92;
+      utt.pitch = 1;
+      utt.volume = 1;
+      utt.onend = speakNext;
+      utt.onerror = speakNext; // skip broken chunks
+      synth.speak(utt);
+    }
+
     btnReadAloud.addEventListener('click', () => {
       if (isReading) {
-        synth.cancel();
-        isReading = false;
-        btnReadAloud.textContent = '🔊 READ ALOUD';
-        btnReadAloud.style.background = '#fff';
-        btnReadAloud.style.color = '#1a1a1a';
+        stopReading();
         statusRight.textContent = '';
-      } else {
-        if (stories.length === 0) {
-          alert('No stories to read.');
-          return;
-        }
-
-        isReading = true;
-        btnReadAloud.textContent = '⏸ PAUSE';
-        btnReadAloud.style.background = '#1a1a1a';
-        btnReadAloud.style.color = '#faf9f6';
-        statusRight.textContent = 'Reading aloud...';
-
-        // Build full text from all visible stories
-        let fullText = 'Neutral News. ';
-        stories.forEach((story, i) => {
-          fullText += `Story ${i + 1}. `;
-          fullText += story.headline + '. ';
-          fullText += story.summary.replace(/\n/g, ' ') + '. ';
-          if (story.balanced_context) {
-            fullText += 'Other perspectives. ' + story.balanced_context.replace(/\n/g, ' ') + '. ';
-          }
-          fullText += story.closing_line + '. ';
-        });
-
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-
-        utterance.onend = () => {
-          isReading = false;
-          btnReadAloud.textContent = '🔊 READ ALOUD';
-          btnReadAloud.style.background = '#fff';
-          btnReadAloud.style.color = '#1a1a1a';
-          statusRight.textContent = 'Done reading.';
-        };
-
-        synth.speak(utterance);
+        return;
       }
+      if (stories.length === 0) { alert('No stories loaded yet.'); return; }
+
+      isReading = true;
+      readQueue = [];
+      btnReadAloud.textContent = '⏸ STOP';
+      btnReadAloud.style.background = '#1a1a1a';
+      btnReadAloud.style.color = '#faf9f6';
+      statusRight.textContent = 'Reading aloud…';
+
+      // Build sentence queue (one sentence per utterance avoids Chrome 15s bug)
+      readQueue.push('Neutral News.');
+      stories.forEach((story, i) => {
+        readQueue.push(`Story ${i + 1}. ${story.headline}.`);
+        // Split summary bullets into individual sentences
+        story.summary.split('\n').filter(l => l.trim()).forEach(line => {
+          readQueue.push(line.replace(/^[•▸\-–]\s*/, '') + '.');
+        });
+        if (story.balanced_context) {
+          readQueue.push('Other perspectives.');
+          story.balanced_context.split('\n').filter(l => l.trim()).forEach(line => {
+            readQueue.push(line.replace(/^[•◦\-–]\s*/, '') + '.');
+          });
+        }
+        if (story.closing_line) {
+          readQueue.push('The bottom line. ' + story.closing_line);
+        }
+      });
+
+      speakNext();
     });
 
-    // ── Settings panel ──
-    const settingsPanel = document.getElementById('settingsPanel');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const settingCount = document.getElementById('settingCount');
-    const settingCountVal = document.getElementById('settingCountVal');
+    // ── Settings panel ──────────────────────────────────
+    const settingsPanel  = document.getElementById('settingsPanel');
+    const settingsOverlay= document.getElementById('settingsOverlay');
+    const settingCount   = document.getElementById('settingCount');
+    const settingCountVal= document.getElementById('settingCountVal');
 
-    // sourceLibrary + serverSettings loaded from /api/settings on open
-    let sourceLibrary = null;
-    let serverSettings = null; // { cities:[], international:[], influencers:[] }
+    let sourceLibrary  = null;
+    let serverSettings = null;
 
-    function buildSourceSection(containerId, title, libraryItems, enabledIds) {
-      const el = document.getElementById(containerId);
-      if (!libraryItems || libraryItems.length === 0) { el.innerHTML = ''; return; }
+    // ── Accordion builder ──
+    function buildAccordion(library, srvSettings) {
+      const enabledCountries = srvSettings?.countries || [];
+      const enabledCities    = srvSettings?.cities    || (() => {
+        const def = [];
+        for (const r of library.regions) for (const c of r.countries)
+          for (const ci of (c.cities||[])) if (ci.defaultEnabled) def.push(ci.id);
+        return def;
+      })();
 
-      let html = `<div class="settings-section"><div class="settings-section-title">${title}</div>`;
-      for (const item of libraryItems) {
-        const checked = enabledIds.includes(item.id) ? 'checked' : '';
-        const sourceNames = item.sources.map(s => s.name).filter((v,i,a) => a.indexOf(v)===i).join(' · ');
-        html += `
-          <label class="settings-check-row">
-            <input type="checkbox" data-section="${containerId}" data-id="${item.id}" ${checked}>
-            <span class="settings-check-label">
-              ${item.label}
-              <span class="settings-check-count">${sourceNames}</span>
-            </span>
-          </label>`;
+      const accordion = document.getElementById('settingsAccordion');
+      let html = '';
+
+      for (const region of library.regions) {
+        html += `<div class="acc-region">
+          <div class="acc-region-header" data-region="${region.id}">
+            <span class="acc-arrow" id="rarr-${region.id}">▶</span>
+            ${region.label}
+          </div>
+          <div class="acc-region-body" id="rbody-${region.id}">`;
+
+        for (const country of region.countries) {
+          const countryChecked = country.alwaysEnabled || enabledCountries.includes(country.id);
+          const disabled = country.alwaysEnabled ? 'disabled title="Always included"' : '';
+          const hasCities = country.cities && country.cities.length > 0;
+
+          html += `<div class="acc-country">
+            <div class="acc-country-header">
+              <label class="acc-country-label">
+                <input type="checkbox" data-type="country" data-id="${country.id}"
+                  ${countryChecked ? 'checked' : ''} ${disabled}>
+                ${country.label}${country.alwaysEnabled ? ' <span style="font-size:0.65rem;color:#aaa;">(always on)</span>' : ''}
+              </label>
+              ${hasCities ? `<span class="acc-country-arrow" data-country="${country.id}">▶</span>` : ''}
+            </div>`;
+
+          if (hasCities) {
+            html += `<div class="acc-country-cities" id="cbody-${country.id}">`;
+            for (const city of country.cities) {
+              const cityChecked = enabledCities.includes(city.id);
+              html += `<label class="acc-city-row">
+                <input type="checkbox" data-type="city" data-id="${city.id}" ${cityChecked ? 'checked' : ''}>
+                ${city.label}
+              </label>`;
+            }
+            html += `</div>`;
+          }
+          html += `</div>`; // acc-country
+        }
+        html += `</div></div>`; // acc-region-body, acc-region
       }
-      html += `</div>`;
+      accordion.innerHTML = html;
+
+      // Region expand/collapse
+      accordion.querySelectorAll('.acc-region-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const id = header.dataset.region;
+          const body  = document.getElementById(`rbody-${id}`);
+          const arrow = document.getElementById(`rarr-${id}`);
+          body.classList.toggle('open');
+          arrow.classList.toggle('open');
+        });
+      });
+
+      // Country city expand/collapse (arrow only)
+      accordion.querySelectorAll('.acc-country-arrow').forEach(arrow => {
+        arrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = arrow.dataset.country;
+          const body = document.getElementById(`cbody-${id}`);
+          body.classList.toggle('open');
+          arrow.classList.toggle('open');
+        });
+      });
+
+      // Checkbox changes → save
+      accordion.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', onSourceToggle);
+      });
+    }
+
+    function buildInfluencerSection(library, srvSettings) {
+      const enabledInfl = srvSettings?.influencers ||
+        library.influencers.filter(x => x.defaultEnabled).map(x => x.id);
+
+      const el = document.getElementById('settingsInfluencers');
+      let html = '';
+      for (const inf of library.influencers) {
+        const checked = enabledInfl.includes(inf.id) ? 'checked' : '';
+        const sourceNames = [...new Set(inf.sources.map(s => s.name))].join(' · ');
+        html += `<label class="settings-check-row">
+          <input type="checkbox" data-type="influencer" data-id="${inf.id}" ${checked}>
+          <span class="settings-check-label">
+            ${inf.label}
+            <span class="settings-check-count">${sourceNames}</span>
+          </span>
+        </label>`;
+      }
       el.innerHTML = html;
-
-      // Attach change listeners
-      el.querySelectorAll('input[type=checkbox]').forEach(cb => {
-        cb.addEventListener('change', () => onSourceToggle(cb));
-      });
+      el.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', onSourceToggle));
     }
 
-    function getEnabledIds(section) {
-      const container = document.getElementById(section);
-      const checked = [];
-      container.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
-        checked.push(cb.dataset.id);
-      });
-      return checked;
+    function collectSettings() {
+      const countries = [], cities = [], influencers = [];
+      document.querySelectorAll('#settingsAccordion input[data-type=country]:checked:not(:disabled)').forEach(cb => countries.push(cb.dataset.id));
+      document.querySelectorAll('#settingsAccordion input[data-type=city]:checked').forEach(cb => cities.push(cb.dataset.id));
+      document.querySelectorAll('#settingsInfluencers input[data-type=influencer]:checked').forEach(cb => influencers.push(cb.dataset.id));
+      return { storyCount: settings.storyCount, countries, cities, influencers };
     }
 
-    async function onSourceToggle(cb) {
-      const newSettings = {
-        storyCount: settings.storyCount,
-        cities: getEnabledIds('settingsCities'),
-        international: getEnabledIds('settingsInternational'),
-        influencers: getEnabledIds('settingsInfluencers'),
-      };
+    async function onSourceToggle() {
+      const newSettings = collectSettings();
       serverSettings = newSettings;
-      // Save to server
       try {
         await fetch('/api/settings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newSettings),
         });
-      } catch (e) { console.warn('Could not save settings to server'); }
-      statusRight.textContent = 'Source settings saved. Takes effect on next scrape.';
+        statusRight.textContent = 'Settings saved — takes effect on next scrape.';
+      } catch (e) { console.warn('Could not save settings'); }
     }
 
     async function openSettings() {
       settingsPanel.classList.add('open');
       settingsOverlay.classList.add('open');
 
-      // Load library + settings from server if not yet loaded
       if (!sourceLibrary) {
         try {
           const res = await fetch('/api/settings');
           const data = await res.json();
-          sourceLibrary = data.library;
-          serverSettings = data.settings; // may be null (means use defaults)
+          sourceLibrary  = data.library;
+          serverSettings = data.settings;
         } catch (e) {
-          console.warn('Could not load settings from server');
+          document.getElementById('settingsAccordion').innerHTML =
+            '<div style="padding:20px;color:#c00;font-size:0.8rem;">Could not load sources.</div>';
           return;
         }
       }
 
-      // Build enabled id lists (server saved, or defaults)
-      const enabledCities = serverSettings?.cities ||
-        sourceLibrary.cities.filter(x => x.defaultEnabled).map(x => x.id);
-      const enabledIntl = serverSettings?.international ||
-        sourceLibrary.international.filter(x => x.defaultEnabled).map(x => x.id);
-      const enabledInfl = serverSettings?.influencers ||
-        sourceLibrary.influencers.filter(x => x.defaultEnabled).map(x => x.id);
-
-      settingCount.value = serverSettings?.storyCount || settings.storyCount;
+      settingCount.value    = serverSettings?.storyCount || settings.storyCount;
       settingCountVal.textContent = settingCount.value;
-
-      buildSourceSection('settingsCities',       'Canadian Cities',         sourceLibrary.cities,       enabledCities);
-      buildSourceSection('settingsInternational', 'International Regions',   sourceLibrary.international,enabledIntl);
-      buildSourceSection('settingsInfluencers',   'Health & Science Voices', sourceLibrary.influencers,  enabledInfl);
+      buildAccordion(sourceLibrary, serverSettings);
+      buildInfluencerSection(sourceLibrary, serverSettings);
     }
 
     function closeSettings() {
@@ -901,13 +1103,11 @@
     document.getElementById('btnCloseSettings').addEventListener('click', closeSettings);
     settingsOverlay.addEventListener('click', closeSettings);
 
-    // Stories-per-category slider
     settingCount.addEventListener('input', async () => {
       settings.storyCount = parseInt(settingCount.value, 10);
       settingCountVal.textContent = settings.storyCount;
       saveSettings();
       renderStories();
-      // Also persist to server if serverSettings exists
       if (serverSettings) {
         serverSettings.storyCount = settings.storyCount;
         try {
@@ -930,12 +1130,61 @@
       renderStories();
     });
 
-    // ── Manual refresh ──
-    // Scrape runs in background on server — can take several minutes.
-    // We kick it off then poll every 8 seconds for new stories.
+    // ── Manual refresh — max 3 clicks per 15-minute window ──
+    const REFRESH_MAX = 3;
+    const REFRESH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+    let refreshTimestamps = []; // array of Date.now() for each click
+    let refreshCountdown = null; // interval for countdown timer
+
+    function updateRefreshButton() {
+      const now = Date.now();
+      // Drop timestamps older than 15 min
+      refreshTimestamps = refreshTimestamps.filter(t => now - t < REFRESH_WINDOW_MS);
+      const used = refreshTimestamps.length;
+      const left = REFRESH_MAX - used;
+
+      if (left <= 0) {
+        // Find when the oldest click expires
+        const oldestExpiry = refreshTimestamps[0] + REFRESH_WINDOW_MS;
+        const secsLeft = Math.ceil((oldestExpiry - now) / 1000);
+        const mins = Math.floor(secsLeft / 60);
+        const secs = secsLeft % 60;
+        btnRefresh.disabled = true;
+        btnRefresh.textContent = `↺ (${mins}:${secs.toString().padStart(2,'0')})`;
+
+        // Start countdown if not already running
+        if (!refreshCountdown) {
+          refreshCountdown = setInterval(() => {
+            const n = Date.now();
+            refreshTimestamps = refreshTimestamps.filter(t => n - t < REFRESH_WINDOW_MS);
+            if (refreshTimestamps.length < REFRESH_MAX) {
+              clearInterval(refreshCountdown);
+              refreshCountdown = null;
+              updateRefreshButton();
+            } else {
+              const exp = refreshTimestamps[0] + REFRESH_WINDOW_MS;
+              const s = Math.ceil((exp - n) / 1000);
+              const m = Math.floor(s / 60);
+              btnRefresh.textContent = `↺ (${m}:${(s % 60).toString().padStart(2,'0')})`;
+            }
+          }, 1000);
+        }
+      } else {
+        btnRefresh.disabled = false;
+        btnRefresh.textContent = left < REFRESH_MAX ? `↺ Refresh (${left} left)` : '↺ Refresh';
+      }
+    }
+
     btnRefresh.addEventListener('click', async () => {
-      btnRefresh.disabled = true;
+      const now = Date.now();
+      refreshTimestamps = refreshTimestamps.filter(t => now - t < REFRESH_WINDOW_MS);
+      if (refreshTimestamps.length >= REFRESH_MAX) return; // guard
+
+      refreshTimestamps.push(now);
+      updateRefreshButton();
+
       btnRefresh.textContent = '…';
+      btnRefresh.disabled = true;
       statusRight.textContent = 'Scrape started — stories loading as they are processed...';
 
       try {
@@ -960,9 +1209,8 @@
 
         if (pollCount >= maxPolls) {
           clearInterval(poll);
-          btnRefresh.disabled = false;
-          btnRefresh.textContent = '↺ Refresh';
           statusRight.textContent = `Done — ${stories.length} stories total`;
+          updateRefreshButton(); // restore correct state
         }
       }, 8000);
     });
