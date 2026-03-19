@@ -70,45 +70,71 @@
       border-color: #1a1a1a;
     }
 
-    /* ── Controls ──────────────────────────────────────── */
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      font-size: 0.8rem;
-      color: #666;
-    }
-    .controls button {
-      font-family: inherit;
-      font-size: 0.78rem;
-      background: none;
-      border: 1px solid #aaa;
-      padding: 3px 10px;
-      cursor: pointer;
-      color: #555;
-    }
-    .controls button:hover { background: #eee; }
-    .controls button:disabled { opacity: 0.4; cursor: default; }
-
     /* ── Category Section ─────────────────────────────── */
-    .category-section { margin-bottom: 28px; }
+    .category-section {
+      margin-bottom: 28px;
+    }
+
+    /* ── Sticky Category Header ───────────────────────── */
     .category-header {
       font-size: 1.1rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       border-bottom: 2px solid #1a1a1a;
-      padding-bottom: 4px;
+      padding: 8px 0 4px;
       margin-bottom: 14px;
+      /* Sticky behaviour */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #faf9f6;
     }
 
     /* ── Story Card ────────────────────────────────────── */
     .story {
       border-bottom: 1px solid #ddd;
       padding: 14px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
     }
     .story:last-child { border-bottom: none; }
+
+    /* ── Story Number Badge ────────────────────────────── */
+    .story-number {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border: 2px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-top: 2px;
+      /* Square / boxed look */
+      border-radius: 0;
+    }
+
+    /* ── Story Body ────────────────────────────────────── */
+    .story-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Story Photo ───────────────────────────────────── */
+    .story-photo {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      display: block;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      filter: grayscale(20%);
+    }
 
     .story-headline {
       font-size: 1.05rem;
@@ -116,6 +142,7 @@
       margin-bottom: 6px;
       line-height: 1.3;
     }
+
     .story-bullets {
       font-size: 0.88rem;
       color: #2a2a2a;
@@ -126,6 +153,7 @@
       margin-bottom: 3px;
       list-style-type: '•  ';
     }
+
     .story-context {
       font-size: 0.84rem;
       color: #444;
@@ -137,11 +165,13 @@
       list-style-type: '◦  ';
       font-style: italic;
     }
+
     .story-closing {
       font-size: 0.84rem;
       color: #333;
       margin-bottom: 8px;
     }
+
     .story-cta {
       font-size: 0.76rem;
       color: #888;
@@ -151,14 +181,29 @@
       text-decoration: none;
       border: 1px solid #ddd;
     }
-    .story-cta:hover { background: #e8e7e4; color: #555; }
+    .story-cta:hover {
+      background: #e8e7e4;
+      color: #555;
+    }
+
     .story-sources {
       font-size: 0.68rem;
       color: #999;
       margin-top: 6px;
     }
-    .story-sources a { color: #888; text-decoration: none; }
+    .story-sources a {
+      color: #888;
+      text-decoration: none;
+    }
     .story-sources a:hover { text-decoration: underline; }
+
+    /* ── Article timestamp ─────────────────────────────── */
+    .story-timestamp {
+      font-size: 0.65rem;
+      color: #bbb;
+      margin-top: 6px;
+      font-family: 'Courier New', monospace;
+    }
 
     /* ── Loading / Empty States ────────────────────────── */
     .loading, .empty-state {
@@ -181,10 +226,32 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Floating Refresh Button ───────────────────────── */
+    #btnRefresh {
+      position: fixed;
+      bottom: 32px;       /* sit just above the status bar */
+      right: 16px;
+      z-index: 50;
+      font-family: 'Courier New', monospace;
+      font-size: 0.68rem;
+      background: #1a1a1a;
+      color: #e8e7e4;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity 0.2s;
+      letter-spacing: 0.03em;
+    }
+    #btnRefresh:hover { opacity: 0.9; }
+    #btnRefresh:disabled { opacity: 0.25; cursor: default; }
+
     /* ── Status bar ────────────────────────────────────── */
     .status-bar {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       background: #1a1a1a;
       color: #ccc;
       font-size: 0.72rem;
@@ -198,17 +265,20 @@
     @media (max-width: 600px) {
       .masthead h1 { font-size: 1.6rem; }
       body { padding: 12px 10px 50px; }
+      .story-number { width: 24px; height: 24px; font-size: 0.7rem; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Masthead -->
   <header class="masthead">
     <h1>Neutral News</h1>
     <div class="tagline">Balanced. Concise. No hooks.</div>
     <div class="date-line" id="dateLine"></div>
   </header>
 
+  <!-- Category Filter -->
   <nav class="nav-bar" id="navBar">
     <button class="active" data-cat="all">All</button>
     <button data-cat="toronto">Toronto</button>
@@ -217,34 +287,35 @@
     <button data-cat="health">Health / @foundmyfitness</button>
   </nav>
 
-  <div class="controls">
-    <span id="storyCount"></span>
-    <div>
-      <button id="btnRefresh" title="Trigger a manual scrape">Refresh feeds</button>
-    </div>
-  </div>
-
+  <!-- Main Content -->
   <main id="content">
     <div class="loading"><span class="spinner"></span> Loading stories...</div>
   </main>
 
+  <!-- Floating Refresh Button -->
+  <button id="btnRefresh" title="Trigger a manual scrape">↺ Refresh</button>
+
+  <!-- Status Bar -->
   <div class="status-bar">
     <span id="statusLeft">Neutral News v1.0</span>
     <span id="statusRight"></span>
   </div>
 
   <script>
+    // ── State ──
     let currentCategory = 'all';
     let stories = [];
 
+    // ── DOM refs ──
     const content = document.getElementById('content');
     const dateLine = document.getElementById('dateLine');
-    const storyCount = document.getElementById('storyCount');
     const statusRight = document.getElementById('statusRight');
     const btnRefresh = document.getElementById('btnRefresh');
 
+    // ── Date formatting ──
     function todayStr() {
-      return new Date().toLocaleDateString('en-CA');
+      const d = new Date();
+      return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
     }
     function prettyDate(str) {
       const d = new Date(str + 'T12:00:00');
@@ -252,8 +323,19 @@
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
       });
     }
+    function formatTimestamp(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleString('en-CA', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', hour12: true,
+          timeZoneName: 'short'
+        });
+      } catch (e) { return ''; }
+    }
 
-    // silent=true skips the loading spinner (used during background polling)
+    // ── Fetch stories from API ──
     async function loadStories(silent = false) {
       if (!silent) {
         content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading stories...</div>';
@@ -266,9 +348,7 @@
         stories = data.stories || [];
         dateLine.textContent = prettyDate(date);
         renderStories();
-        if (!silent) {
-          statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
-        }
+        statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
       } catch (err) {
         if (!silent) {
           content.innerHTML = `<div class="empty-state">Could not load stories. Is the server running?</div>`;
@@ -276,18 +356,17 @@
       }
     }
 
+    // ── Render ──
     function renderStories() {
       if (stories.length === 0) {
         content.innerHTML = `<div class="empty-state">
           No stories yet for today. Stories appear after the next scheduled scrape,
-          or click "Refresh feeds" to trigger one now.
+          or click ↺ Refresh (bottom-right) to trigger one now.
         </div>`;
-        storyCount.textContent = '0 stories';
         return;
       }
 
-      storyCount.textContent = `${stories.length} ${stories.length === 1 ? 'story' : 'stories'}`;
-
+      // Group by category
       const grouped = {};
       const catOrder = ['toronto', 'canada', 'international', 'health'];
       const catLabels = {
@@ -314,39 +393,60 @@
           html += `<h2 class="category-header">${catLabels[cat] || cat}</h2>`;
         }
 
-        catStories.forEach(story => {
+        catStories.forEach((story, idx) => {
           const sources = JSON.parse(story.sources_json || '[]');
           const primaryLink = sources[0]?.url || '#';
+
+          // Parse bullets
           const summaryBullets = story.summary.split('\n').filter(l => l.trim());
           const contextBullets = story.balanced_context.split('\n').filter(l => l.trim());
 
-          html += `<article class="story">`;
-          html += `<div class="story-headline">${esc(story.headline)}</div>`;
+          const storyNum = idx + 1;
+          const timestamp = formatTimestamp(story.scraped_at);
 
-          html += `<ul class="story-bullets">`;
+          html += `<article class="story">`;
+
+          // Boxed story number
+          html += `  <div class="story-number">${storyNum}</div>`;
+
+          html += `  <div class="story-body">`;
+          // Photo (from RSS feed, if available)
+          if (story.image_url) {
+            html += `    <img class="story-photo" src="${esc(story.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+          }
+          html += `    <div class="story-headline">${esc(story.headline)}</div>`;
+
+          html += `    <ul class="story-bullets">`;
           summaryBullets.forEach(b => {
             html += `<li>${esc(b.replace(/^[•\-–]\s*/, ''))}</li>`;
           });
-          html += `</ul>`;
+          html += `    </ul>`;
 
           if (story.balanced_context) {
-            html += `<ul class="story-context">`;
+            html += `    <ul class="story-context">`;
             contextBullets.forEach(b => {
               html += `<li>${esc(b.replace(/^[•◦\-–]\s*/, ''))}</li>`;
             });
-            html += `</ul>`;
+            html += `    </ul>`;
           }
 
           if (story.closing_line) {
-            html += `<div class="story-closing">${esc(story.closing_line)}</div>`;
+            html += `    <div class="story-closing">${esc(story.closing_line)}</div>`;
           }
 
-          html += `<a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. The rest is optional &rsaquo;</a>`;
-          html += `<div class="story-sources">Sources: `;
+          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. The rest is optional &rsaquo;</a>`;
+
+          html += `    <div class="story-sources">Sources: `;
           html += sources.map(s =>
             `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`
           ).join(' · ');
           html += `</div>`;
+
+          if (timestamp) {
+            html += `    <div class="story-timestamp">Scraped ${timestamp}</div>`;
+          }
+
+          html += `  </div>`; // .story-body
           html += `</article>`;
         });
 
@@ -356,12 +456,14 @@
       content.innerHTML = html;
     }
 
+    // ── Escape HTML ──
     function esc(s) {
       const el = document.createElement('span');
       el.textContent = s || '';
       return el.innerHTML;
     }
 
+    // ── Nav buttons ──
     document.getElementById('navBar').addEventListener('click', (e) => {
       if (e.target.tagName !== 'BUTTON') return;
       document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
@@ -370,22 +472,24 @@
       renderStories();
     });
 
-    // Kick off scrape, then silently poll in background until stories appear
+    // ── Manual refresh ──
+    // Scrape runs in background on server — can take several minutes.
+    // We kick it off then poll every 8 seconds for new stories.
     btnRefresh.addEventListener('click', async () => {
       btnRefresh.disabled = true;
-      btnRefresh.textContent = 'Scraping...';
-      statusRight.textContent = 'Scrape started — stories will appear as they are processed...';
+      btnRefresh.textContent = '…';
+      statusRight.textContent = 'Scrape started — stories loading as they are processed...';
 
       try {
         await fetch('/api/scrape', { method: 'POST' });
       } catch (err) {
-        // fire-and-forget
+        // Fire-and-forget — ignore network errors here
       }
 
+      // Poll every 8 seconds for up to 8 minutes
       let previousCount = stories.length;
-      let stallCount = 0;
       let pollCount = 0;
-      const maxPolls = 60; // 8 min max
+      const maxPolls = 60;
 
       const poll = setInterval(async () => {
         pollCount++;
@@ -394,24 +498,21 @@
         if (stories.length > previousCount) {
           statusRight.textContent = `${stories.length} stories loaded — still processing...`;
           previousCount = stories.length;
-          stallCount = 0;
-        } else {
-          stallCount++;
         }
 
-        // Stop if: max polls reached, OR no new stories for 3 cycles after we have some
-        const done = pollCount >= maxPolls || (stallCount >= 3 && stories.length > 0);
-        if (done) {
+        if (pollCount >= maxPolls) {
           clearInterval(poll);
           btnRefresh.disabled = false;
-          btnRefresh.textContent = 'Refresh feeds';
-          statusRight.textContent = `Done — ${stories.length} ${stories.length === 1 ? 'story' : 'stories'} loaded`;
-          await loadStories(); // final full refresh
+          btnRefresh.textContent = '↺ Refresh';
+          statusRight.textContent = `Done — ${stories.length} stories total`;
         }
       }, 8000);
     });
 
+    // ── Initial load ──
     loadStories();
+
+    // ── Auto-refresh every 10 minutes ──
     setInterval(() => loadStories(true), 10 * 60 * 1000);
   </script>
 </body>
