@@ -86,11 +86,11 @@ app.get('/api/settings', (req, res) => {
 // ── API: Save user settings ──
 app.post('/api/settings', express.json(), (req, res) => {
   try {
-    const { storyCount, cities, international, influencers } = req.body;
-    if (!cities || !international || !influencers) {
+    const { storyCount, countries, cities, influencers } = req.body;
+    if (!countries || !cities || !influencers) {
       return res.status(400).json({ error: 'Missing settings fields' });
     }
-    saveUserSettings({ storyCount, cities, international, influencers });
+    saveUserSettings({ storyCount, countries, cities, influencers });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save settings' });
