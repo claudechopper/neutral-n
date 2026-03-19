@@ -5,7 +5,7 @@
 module.exports = {
   // ── Google Gemini API ──────────────────────────────────
   geminiApiKey: process.env.GOOGLE_API_KEY || '',
-  geminiModel: 'gemini-1.5-flash',
+  geminiModel: 'gemini-2.0-flash',
 
   // ── Server ─────────────────────────────────────────────
   port: parseInt(process.env.PORT, 10) || 3000,
