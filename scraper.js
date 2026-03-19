@@ -95,7 +95,7 @@ async function scrapeHtmlPage(source) {
       items.push({
         title,
         link,
-        description: title, // HTML scrape: description = title (AI will work with what's available)
+        description: title,
         pubDate: new Date().toISOString(),
         sourceName: source.name,
         sourceUrl: link || source.url,
@@ -114,7 +114,6 @@ async function fetchSource(source) {
   if (source.type === 'scrape') {
     return scrapeHtmlPage(source);
   }
-  // Default: RSS, but if RSS fails and source has selectors, try HTML scrape
   const rssItems = await fetchRssFeed(source);
   if (rssItems.length > 0) return rssItems;
 
@@ -137,7 +136,6 @@ async function fetchCategory(categoryKey) {
     allItems = allItems.concat(items);
   }
 
-  // If we got nothing, try fallbacks
   if (allItems.length === 0 && config.fallbackFeeds[categoryKey]) {
     console.log(`  [INFO] Primary sources empty for ${categoryKey}, trying fallbacks...`);
     for (const source of config.fallbackFeeds[categoryKey]) {
@@ -171,7 +169,6 @@ function groupSimilarStories(items) {
         items[j].title.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3)
       );
 
-      // Jaccard similarity on significant title words
       const intersection = [...wordsA].filter(w => wordsB.has(w)).length;
       const union = new Set([...wordsA, ...wordsB]).size;
       const similarity = union > 0 ? intersection / union : 0;
@@ -179,7 +176,7 @@ function groupSimilarStories(items) {
       if (similarity > 0.35) {
         group.push(items[j]);
         used.add(j);
-        if (group.length >= 3) break; // Max 3 sources per story
+        if (group.length >= 3) break;
       }
     }
 
@@ -206,7 +203,6 @@ async function scrapeAll() {
     const catLabel = config.feeds[categoryKey].label;
     console.log(`\n── ${catLabel} ──`);
 
-    // 1. Fetch raw items from all sources
     const rawItems = await fetchCategory(categoryKey);
     console.log(`  Fetched ${rawItems.length} raw items`);
 
@@ -215,7 +211,6 @@ async function scrapeAll() {
       continue;
     }
 
-    // 2. Filter out items already in DB
     const newItems = rawItems.filter(item => {
       const fp = makeFingerprint(item.title);
       return !db.fingerprintExists(fp);
@@ -227,46 +222,50 @@ async function scrapeAll() {
       continue;
     }
 
-    // 3. Group similar stories (cross-reference sources)
     const groups = groupSimilarStories(newItems);
     console.log(`  ${groups.length} story groups formed`);
 
-    // 4. Take top N groups
     const topGroups = groups.slice(0, config.maxStoriesPerCategory);
 
-    // 5. Summarize each group with AI
+    // Delay between calls to stay under Gemini free tier (15 req/min limit)
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
     for (const group of topGroups) {
       try {
         const summary = await summarizer.summarizeStory(group, categoryKey);
 
         if (!summary) {
           console.log(`  [WARN] Empty summary for: ${group[0].title}`);
-          continue;
+        } else {
+          const fp = makeFingerprint(group[0].title);
+          const sources = group.map(item => ({
+            name: item.sourceName,
+            url: item.link,
+          }));
+
+          db.insertStory({
+            category: categoryKey,
+            headline: summary.headline,
+            summary: summary.coreSummary,
+            balanced_context: summary.balancedContext,
+            closing_line: summary.closingLine,
+            sources_json: JSON.stringify(sources),
+            fingerprint: fp,
+            scraped_at: timestamp,
+            scrape_date: today,
+          });
+
+          totalNew++;
+          console.log(`  ✓ ${summary.headline}`);
         }
-
-        const fp = makeFingerprint(group[0].title);
-        const sources = group.map(item => ({
-          name: item.sourceName,
-          url: item.link,
-        }));
-
-        db.insertStory({
-          category: categoryKey,
-          headline: summary.headline,
-          summary: summary.coreSummary,
-          balanced_context: summary.balancedContext,
-          closing_line: summary.closingLine,
-          sources_json: JSON.stringify(sources),
-          fingerprint: fp,
-          scraped_at: timestamp,
-          scrape_date: today,
-        });
-
-        totalNew++;
-        console.log(`  ✓ ${summary.headline}`);
       } catch (err) {
         console.error(`  [ERROR] Summarizing "${group[0].title}": ${err.message}`);
       }
+
+      // Always wait 4.5s between calls — keeps us at ~13 req/min, safely
+      // under the free tier limit of 15 req/min. Remove this once you add
+      // Google billing, which raises the limit to 2,000 req/min.
+      await delay(4500);
     }
   }
 
