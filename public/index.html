@@ -92,9 +92,7 @@
     .controls button:disabled { opacity: 0.4; cursor: default; }
 
     /* ── Category Section ─────────────────────────────── */
-    .category-section {
-      margin-bottom: 28px;
-    }
+    .category-section { margin-bottom: 28px; }
     .category-header {
       font-size: 1.1rem;
       font-weight: 700;
@@ -118,7 +116,6 @@
       margin-bottom: 6px;
       line-height: 1.3;
     }
-
     .story-bullets {
       font-size: 0.88rem;
       color: #2a2a2a;
@@ -129,7 +126,6 @@
       margin-bottom: 3px;
       list-style-type: '•  ';
     }
-
     .story-context {
       font-size: 0.84rem;
       color: #444;
@@ -141,13 +137,11 @@
       list-style-type: '◦  ';
       font-style: italic;
     }
-
     .story-closing {
       font-size: 0.84rem;
       color: #333;
       margin-bottom: 8px;
     }
-
     .story-cta {
       font-size: 0.76rem;
       color: #888;
@@ -157,20 +151,13 @@
       text-decoration: none;
       border: 1px solid #ddd;
     }
-    .story-cta:hover {
-      background: #e8e7e4;
-      color: #555;
-    }
-
+    .story-cta:hover { background: #e8e7e4; color: #555; }
     .story-sources {
       font-size: 0.68rem;
       color: #999;
       margin-top: 6px;
     }
-    .story-sources a {
-      color: #888;
-      text-decoration: none;
-    }
+    .story-sources a { color: #888; text-decoration: none; }
     .story-sources a:hover { text-decoration: underline; }
 
     /* ── Loading / Empty States ────────────────────────── */
@@ -197,9 +184,7 @@
     /* ── Status bar ────────────────────────────────────── */
     .status-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: #1a1a1a;
       color: #ccc;
       font-size: 0.72rem;
@@ -218,14 +203,12 @@
 </head>
 <body>
 
-  <!-- Masthead -->
   <header class="masthead">
     <h1>Neutral News</h1>
     <div class="tagline">Balanced. Concise. No hooks.</div>
     <div class="date-line" id="dateLine"></div>
   </header>
 
-  <!-- Category Filter -->
   <nav class="nav-bar" id="navBar">
     <button class="active" data-cat="all">All</button>
     <button data-cat="toronto">Toronto</button>
@@ -234,7 +217,6 @@
     <button data-cat="health">Health / @foundmyfitness</button>
   </nav>
 
-  <!-- Controls -->
   <div class="controls">
     <span id="storyCount"></span>
     <div>
@@ -242,33 +224,27 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <main id="content">
     <div class="loading"><span class="spinner"></span> Loading stories...</div>
   </main>
 
-  <!-- Status Bar -->
   <div class="status-bar">
     <span id="statusLeft">Neutral News v1.0</span>
     <span id="statusRight"></span>
   </div>
 
   <script>
-    // ── State ──
     let currentCategory = 'all';
     let stories = [];
 
-    // ── DOM refs ──
     const content = document.getElementById('content');
     const dateLine = document.getElementById('dateLine');
     const storyCount = document.getElementById('storyCount');
     const statusRight = document.getElementById('statusRight');
     const btnRefresh = document.getElementById('btnRefresh');
 
-    // ── Date formatting ──
     function todayStr() {
-      const d = new Date();
-      return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+      return new Date().toLocaleDateString('en-CA');
     }
     function prettyDate(str) {
       const d = new Date(str + 'T12:00:00');
@@ -277,9 +253,11 @@
       });
     }
 
-    // ── Fetch stories from API ──
-    async function loadStories() {
-      content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading stories...</div>';
+    // silent=true skips the loading spinner (used during background polling)
+    async function loadStories(silent = false) {
+      if (!silent) {
+        content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading stories...</div>';
+      }
       try {
         const date = todayStr();
         const url = `/api/stories?date=${date}&category=${currentCategory}`;
@@ -288,13 +266,16 @@
         stories = data.stories || [];
         dateLine.textContent = prettyDate(date);
         renderStories();
-        statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
+        if (!silent) {
+          statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
+        }
       } catch (err) {
-        content.innerHTML = `<div class="empty-state">Could not load stories. Is the server running?</div>`;
+        if (!silent) {
+          content.innerHTML = `<div class="empty-state">Could not load stories. Is the server running?</div>`;
+        }
       }
     }
 
-    // ── Render ──
     function renderStories() {
       if (stories.length === 0) {
         content.innerHTML = `<div class="empty-state">
@@ -307,7 +288,6 @@
 
       storyCount.textContent = `${stories.length} ${stories.length === 1 ? 'story' : 'stories'}`;
 
-      // Group by category
       const grouped = {};
       const catOrder = ['toronto', 'canada', 'international', 'health'];
       const catLabels = {
@@ -337,40 +317,36 @@
         catStories.forEach(story => {
           const sources = JSON.parse(story.sources_json || '[]');
           const primaryLink = sources[0]?.url || '#';
-
-          // Parse bullets
           const summaryBullets = story.summary.split('\n').filter(l => l.trim());
           const contextBullets = story.balanced_context.split('\n').filter(l => l.trim());
 
           html += `<article class="story">`;
-          html += `  <div class="story-headline">${esc(story.headline)}</div>`;
+          html += `<div class="story-headline">${esc(story.headline)}</div>`;
 
-          html += `  <ul class="story-bullets">`;
+          html += `<ul class="story-bullets">`;
           summaryBullets.forEach(b => {
             html += `<li>${esc(b.replace(/^[•\-–]\s*/, ''))}</li>`;
           });
-          html += `  </ul>`;
+          html += `</ul>`;
 
           if (story.balanced_context) {
-            html += `  <ul class="story-context">`;
+            html += `<ul class="story-context">`;
             contextBullets.forEach(b => {
               html += `<li>${esc(b.replace(/^[•◦\-–]\s*/, ''))}</li>`;
             });
-            html += `  </ul>`;
+            html += `</ul>`;
           }
 
           if (story.closing_line) {
-            html += `  <div class="story-closing">${esc(story.closing_line)}</div>`;
+            html += `<div class="story-closing">${esc(story.closing_line)}</div>`;
           }
 
-          html += `  <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. The rest is optional &rsaquo;</a>`;
-
-          html += `  <div class="story-sources">Sources: `;
+          html += `<a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. The rest is optional &rsaquo;</a>`;
+          html += `<div class="story-sources">Sources: `;
           html += sources.map(s =>
             `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`
           ).join(' · ');
           html += `</div>`;
-
           html += `</article>`;
         });
 
@@ -380,14 +356,12 @@
       content.innerHTML = html;
     }
 
-    // ── Escape HTML ──
     function esc(s) {
       const el = document.createElement('span');
       el.textContent = s || '';
       return el.innerHTML;
     }
 
-    // ── Nav buttons ──
     document.getElementById('navBar').addEventListener('click', (e) => {
       if (e.target.tagName !== 'BUTTON') return;
       document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
@@ -396,29 +370,49 @@
       renderStories();
     });
 
-    // ── Manual refresh ──
+    // Kick off scrape, then silently poll in background until stories appear
     btnRefresh.addEventListener('click', async () => {
       btnRefresh.disabled = true;
       btnRefresh.textContent = 'Scraping...';
-      statusRight.textContent = 'Scrape in progress...';
+      statusRight.textContent = 'Scrape started — stories will appear as they are processed...';
+
       try {
-        const res = await fetch('/api/scrape', { method: 'POST' });
-        const data = await res.json();
-        statusRight.textContent = `Scrape done: ${data.newStories || 0} new stories`;
-        await loadStories();
+        await fetch('/api/scrape', { method: 'POST' });
       } catch (err) {
-        statusRight.textContent = 'Scrape failed — check server logs';
-      } finally {
-        btnRefresh.disabled = false;
-        btnRefresh.textContent = 'Refresh feeds';
+        // fire-and-forget
       }
+
+      let previousCount = stories.length;
+      let stallCount = 0;
+      let pollCount = 0;
+      const maxPolls = 60; // 8 min max
+
+      const poll = setInterval(async () => {
+        pollCount++;
+        await loadStories(true); // silent — no spinner flash
+
+        if (stories.length > previousCount) {
+          statusRight.textContent = `${stories.length} stories loaded — still processing...`;
+          previousCount = stories.length;
+          stallCount = 0;
+        } else {
+          stallCount++;
+        }
+
+        // Stop if: max polls reached, OR no new stories for 3 cycles after we have some
+        const done = pollCount >= maxPolls || (stallCount >= 3 && stories.length > 0);
+        if (done) {
+          clearInterval(poll);
+          btnRefresh.disabled = false;
+          btnRefresh.textContent = 'Refresh feeds';
+          statusRight.textContent = `Done — ${stories.length} ${stories.length === 1 ? 'story' : 'stories'} loaded`;
+          await loadStories(); // final full refresh
+        }
+      }, 8000);
     });
 
-    // ── Initial load ──
     loadStories();
-
-    // ── Auto-refresh every 10 minutes ──
-    setInterval(loadStories, 10 * 60 * 1000);
+    setInterval(() => loadStories(true), 10 * 60 * 1000);
   </script>
 </body>
 </html>
