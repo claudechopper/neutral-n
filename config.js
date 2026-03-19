@@ -19,7 +19,7 @@ anthropicModel: 'claude-haiku-4-5-20251001',
   timezone: 'America/Toronto',
 
   // ── Max stories per category per scrape ────────────────
-  maxStoriesPerCategory: 15,
+  maxStoriesPerCategory: 8,
 
   // ── News sources by category ───────────────────────────
   // Each source has: name, url, type ('rss' | 'scrape')
