@@ -469,6 +469,35 @@
     #btnRefresh:hover { opacity: 0.9; }
     #btnRefresh:disabled { opacity: 0.25; cursor: default; }
 
+    /* ── Loading indicator (top-right) ──────────────────── */
+    #loadingIndicator {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #1a1a1a;
+      color: #faf9f6;
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    #loadingIndicator.show {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #loadingIndicator .spinner-small {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #666;
+      border-top-color: #faf9f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
     /* ── Status bar ────────────────────────────────────── */
     .status-bar {
       position: fixed;
@@ -550,6 +579,12 @@
       Changes take effect on the <strong>next scrape</strong> (↺ Refresh or next scheduled run at 6 AM · 11 AM · 6 PM).
     </div>
   </aside>
+
+  <!-- Loading Indicator (top-right) -->
+  <div id="loadingIndicator">
+    <div class="spinner-small"></div>
+    <span>Loading stories...</span>
+  </div>
 
   <!-- Main Content -->
   <main id="content">
@@ -686,6 +721,7 @@
     const dateLine = document.getElementById('dateLine');
     const statusRight = document.getElementById('statusRight');
     const btnRefresh = document.getElementById('btnRefresh');
+    const loadingIndicator = document.getElementById('loadingIndicator');
 
     // ── Date formatting ──
     function todayStr() {
@@ -1183,6 +1219,9 @@
       refreshTimestamps.push(now);
       updateRefreshButton();
 
+      // Show loading indicator
+      loadingIndicator.classList.add('show');
+
       btnRefresh.textContent = '…';
       btnRefresh.disabled = true;
       statusRight.textContent = 'Scrape started — stories loading as they are processed...';
@@ -1210,6 +1249,7 @@
         if (pollCount >= maxPolls) {
           clearInterval(poll);
           statusRight.textContent = `Done — ${stories.length} stories total`;
+          loadingIndicator.classList.remove('show'); // Hide loading indicator
           updateRefreshButton(); // restore correct state
         }
       }, 8000);
