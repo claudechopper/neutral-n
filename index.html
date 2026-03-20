@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neutral News — Balanced, Concise, No Hooks</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', Times, serif;
+      background: #faf9f6;
+      color: #1a1a1a;
+      line-height: 1.5;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    /* ── Masthead ──────────────────────────────────────── */
+    .masthead {
+      text-align: center;
+      border-bottom: 4px double #1a1a1a;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+    .masthead h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .masthead .tagline {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: #555;
+    }
+    .masthead .date-line {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    /* ── Mission Banner ────────────────────────────────── */
+    .mission-banner {
+      text-align: center;
+      font-size: 0.78rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.03em;
+      color: #faf9f6;
+      background: #1a1a1a;
+      padding: 6px 16px;
+      margin-bottom: 0;
+    }
+
+    /* ── Nav / Filters ────────────────────────────────── */
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+      margin-bottom: 20px;
+    }
+    .nav-bar button {
+      font-family: inherit;
+      font-size: 0.82rem;
+      background: none;
+      border: 1px solid #999;
+      padding: 4px 14px;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.15s;
+    }
+    .nav-bar button:hover { background: #eee; }
+    .nav-bar button.active {
+      background: #1a1a1a;
+      color: #faf9f6;
+      border-color: #1a1a1a;
+    }
+
+    /* ── Category Section ─────────────────────────────── */
+    .category-section {
+      margin-bottom: 28px;
+    }
+
+    /* ── Sticky Category Header ───────────────────────── */
+    .category-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 2px solid #1a1a1a;
+      padding: 8px 0 4px;
+      margin-bottom: 14px;
+      /* Sticky behaviour */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #faf9f6;
+    }
+
+    /* ── Story Card ────────────────────────────────────── */
+    .story {
+      border-bottom: 1px solid #ddd;
+      padding: 14px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .story:last-child { border-bottom: none; }
+
+    /* ── Story Number Badge ────────────────────────────── */
+    .story-number {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border: 2px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-top: 2px;
+      /* Square / boxed look */
+      border-radius: 0;
+    }
+
+    /* ── Story Body ────────────────────────────────────── */
+    .story-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Story Photo ───────────────────────────────────── */
+    .story-photo {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      display: block;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      filter: grayscale(20%);
+    }
+
+    /* ── AI Badge + Read Time ──────────────────────────── */
+    .story-meta-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: wrap;
+    }
+    .ai-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #faf9f6;
+      background: #1a1a1a;
+      padding: 2px 6px;
+      text-transform: uppercase;
+    }
+    .read-time {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem;
+      color: #aaa;
+      letter-spacing: 0.04em;
+    }
+
+    .story-headline {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    /* ── Section Labels ────────────────────────────────── */
+    .section-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 7px;
+      margin-bottom: 5px;
+      margin-top: 4px;
+    }
+    .section-label.first {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .story-bullets {
+      font-size: 0.88rem;
+      color: #2a2a2a;
+      margin-bottom: 6px;
+      padding-left: 14px;
+    }
+    .story-bullets li {
+      margin-bottom: 3px;
+      list-style-type: '▸  ';
+    }
+
+    .story-context {
+      font-size: 0.85rem;
+      color: #444;
+      margin-bottom: 6px;
+      padding-left: 14px;
+    }
+    .story-context li {
+      margin-bottom: 3px;
+      list-style-type: '◦  ';
+      font-style: italic;
+    }
+
+    /* ── Bottom Line ───────────────────────────────────── */
+    .bottom-line-label {
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      border-top: 2px solid #1a1a1a;
+      padding-top: 7px;
+      margin-bottom: 4px;
+      margin-top: 4px;
+    }
+    .story-closing {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .story-cta {
+      font-size: 0.76rem;
+      color: #c0392b;
+      background: #fff5f5;
+      display: inline-block;
+      padding: 3px 10px;
+      text-decoration: none;
+      border: 1px solid #e8b4b0;
+    }
+    .story-cta:hover {
+      background: #fde8e6;
+      color: #922b21;
+    }
+
+    .story-sources {
+      font-size: 0.68rem;
+      color: #999;
+      margin-top: 6px;
+    }
+    .story-sources a {
+      color: #888;
+      text-decoration: none;
+    }
+    .story-sources a:hover { text-decoration: underline; }
+
+    /* ── Article timestamp ─────────────────────────────── */
+    .story-timestamp {
+      font-size: 0.65rem;
+      color: #bbb;
+      margin-top: 6px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── Settings Panel ─────────────────────────────────── */
+    .settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 90;
+    }
+    .settings-overlay.open { display: block; }
+
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 320px;
+      height: 100vh;
+      background: #faf9f6;
+      border-left: 3px solid #1a1a1a;
+      z-index: 100;
+      transition: right 0.28s ease;
+      overflow-y: auto;
+      padding: 0 0 40px;
+    }
+    .settings-panel.open { right: 0; }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a1a1a;
+      color: #faf9f6;
+      padding: 12px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .settings-header button {
+      background: none;
+      border: 1px solid #aaa;
+      color: #faf9f6;
+      font-size: 0.9rem;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    /* ── Settings: story count slider ─────────────────── */
+    .settings-section {
+      padding: 14px 16px;
+      border-bottom: 1px solid #ddd;
+    }
+    .settings-section-title {
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .settings-slider-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .settings-slider-row input[type=range] {
+      flex: 1; accent-color: #1a1a1a; height: 4px;
+    }
+    .settings-slider-val {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem; font-weight: 700; min-width: 24px; text-align: right;
+    }
+
+    /* ── Accordion: Region ─────────────────────────────── */
+    .acc-region { border-bottom: 1px solid #ddd; }
+    .acc-region-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; cursor: pointer;
+      background: #ebebeb; user-select: none;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .acc-region-header:hover { background: #e2e2e0; }
+    .acc-region-body { display: none; }
+    .acc-region-body.open { display: block; }
+
+    /* ── Accordion: Country ────────────────────────────── */
+    .acc-country { border-bottom: 1px solid #eee; }
+    .acc-country-header {
+      display: flex; align-items: center;
+      padding: 7px 16px 7px 24px; gap: 8px;
+    }
+    .acc-country-label {
+      flex: 1; font-size: 0.85rem; cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .acc-country-label input[type=checkbox] {
+      width: 15px; height: 15px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .acc-country-arrow {
+      font-size: 0.6rem; color: #999; cursor: pointer;
+      transition: transform 0.2s; user-select: none; padding: 2px 4px;
+    }
+    .acc-country-arrow.open { transform: rotate(90deg); }
+    .acc-country-cities {
+      display: none;
+      background: #f5f4f1;
+      padding: 4px 0;
+      border-top: 1px solid #e8e8e5;
+    }
+    .acc-country-cities.open { display: block; }
+
+    /* ── Accordion: City ───────────────────────────────── */
+    .acc-city-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 16px 6px 44px; font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .acc-city-row:hover { background: #eeede9; }
+    .acc-city-row input[type=checkbox] {
+      width: 14px; height: 14px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ── Settings: Arrow icon ──────────────────────────── */
+    .acc-arrow { transition: transform 0.2s; display: inline-block; }
+    .acc-arrow.open { transform: rotate(90deg); }
+
+    /* ── Settings: influencer rows ─────────────────────── */
+    .settings-check-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 16px; border-bottom: 1px solid #eee; cursor: pointer;
+    }
+    .settings-check-row:last-child { border-bottom: none; }
+    .settings-check-row input[type=checkbox] {
+      width: 15px; height: 15px; accent-color: #1a1a1a;
+      cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    }
+    .settings-check-label {
+      font-size: 0.85rem; flex: 1;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .settings-check-count {
+      font-family: 'Courier New', monospace; font-size: 0.6rem; color: #bbb;
+    }
+
+    .settings-note {
+      padding: 14px 16px; font-size: 0.74rem; color: #999;
+      font-style: italic; line-height: 1.5;
+    }
+
+    /* ── Loading / Empty States ────────────────────────── */
+    .loading, .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ccc;
+      border-top-color: #555;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Floating Refresh Button ───────────────────────── */
+    #btnRefresh {
+      position: fixed;
+      bottom: 32px;       /* sit just above the status bar */
+      right: 16px;
+      z-index: 50;
+      font-family: 'Courier New', monospace;
+      font-size: 0.68rem;
+      background: #1a1a1a;
+      color: #e8e7e4;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity 0.2s;
+      letter-spacing: 0.03em;
+    }
+    #btnRefresh:hover { opacity: 0.9; }
+    #btnRefresh:disabled { opacity: 0.25; cursor: default; }
+
+    /* ── Status bar ────────────────────────────────────── */
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      color: #ccc;
+      font-size: 0.72rem;
+      padding: 4px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── Responsive ────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .masthead h1 { font-size: 1.6rem; }
+      body { padding: 12px 10px 50px; }
+      .story-number { width: 24px; height: 24px; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <h1>Neutral News</h1>
+    <div class="tagline">What matters, nothing more</div>
+    <div class="date-line" id="dateLine"></div>
+  </header>
+
+  <!-- Mission Banner -->
+  <div class="mission-banner">
+    Just Facts. Balanced News in 30 seconds or less. BOTH sides of EVERY story then Move on
+  </div>
+
+  <!-- Category Filter -->
+  <nav class="nav-bar" id="navBar">
+    <button class="active" data-cat="all">All</button>
+    <!-- Dynamic category buttons injected here by JS -->
+    <button id="btnPhotos" data-photos="on" style="margin-left:auto; border: 2px solid #1a1a1a; background:#1a1a1a; color:#faf9f6; font-size:0.8rem; font-weight:600; padding:5px 10px; opacity:0.85; cursor:pointer;">📷 PHOTOS: ON</button>
+    <button id="btnReadAloud" style="border: 2px solid #1a1a1a; background:#fff; color:#1a1a1a; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">🔊 READ ALOUD</button>
+    <button id="btnSettings" style="border: 2px solid #555; background:#fff; color:#333; font-size:0.8rem; font-weight:600; padding:5px 10px; margin-left:4px; cursor:pointer;">⚙ SETTINGS</button>
+  </nav>
+
+  <!-- Settings Overlay + Panel -->
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <aside class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <span>⚙ Settings</span>
+      <button id="btnCloseSettings">✕ Close</button>
+    </div>
+
+    <!-- Stories per category -->
+    <div class="settings-section">
+      <div class="settings-section-title">Stories shown per category</div>
+      <div class="settings-slider-row">
+        <input type="range" id="settingCount" min="1" max="15" value="8" step="1">
+        <span class="settings-slider-val" id="settingCountVal">8</span>
+      </div>
+    </div>
+
+    <!-- Accordion source tree (built by JS) -->
+    <div class="settings-section" style="padding:10px 16px 6px;">
+      <div class="settings-section-title">News Sources — Region › Country › City</div>
+    </div>
+    <div id="settingsAccordion"><div style="padding:20px 16px;font-size:0.8rem;color:#aaa;">Loading sources…</div></div>
+
+    <!-- Health & Science -->
+    <div class="settings-section" style="padding:10px 16px 6px; margin-top:4px;">
+      <div class="settings-section-title">Health & Science Voices</div>
+    </div>
+    <div id="settingsInfluencers"></div>
+
+    <div class="settings-note">
+      Canada national news is always included.<br>
+      International always includes Reuters, AP, BBC &amp; Al Jazeera.<br><br>
+      Changes take effect on the <strong>next scrape</strong> (↺ Refresh or next scheduled run at 6 AM · 11 AM · 6 PM).
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="content">
+    <div class="loading"><span class="spinner"></span> Loading stories...</div>
+  </main>
+
+  <!-- Floating Refresh Button -->
+  <button id="btnRefresh" title="Trigger a manual scrape">↺ Refresh</button>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span id="statusLeft">Neutral News v1.0</span>
+    <span id="statusRight"></span>
+  </div>
+
+  <script>
+    // ── Settings (persisted in localStorage) ──
+    const SETTINGS_KEY = 'neutralnews_settings';
+    const defaultSettings = {
+      storyCount: 8,
+      enabledCats: { toronto: true, canada: true, international: true, health: true },
+    };
+    let settings = (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+        return saved ? Object.assign({}, defaultSettings, saved, {
+          enabledCats: Object.assign({}, defaultSettings.enabledCats, saved.enabledCats)
+        }) : { ...defaultSettings, enabledCats: { ...defaultSettings.enabledCats } };
+      } catch (e) { return { ...defaultSettings, enabledCats: { ...defaultSettings.enabledCats } }; }
+    })();
+
+    function saveSettings() {
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    }
+
+    // ── State ──
+    let currentCategory = 'all';
+    let stories = [];
+
+    // ── Category label map (fallback: capitalize key) ──
+    const CAT_LABELS = {
+      // Canada
+      canada: 'Canada', toronto: 'Toronto', vancouver: 'Vancouver',
+      montreal: 'Montréal', calgary: 'Calgary', edmonton: 'Edmonton',
+      ottawa: 'Ottawa', winnipeg: 'Winnipeg', halifax: 'Halifax',
+      // USA
+      usa: 'United States', new_york: 'New York', los_angeles: 'Los Angeles',
+      chicago: 'Chicago', houston: 'Houston', washington_dc: 'Washington D.C.',
+      san_francisco: 'San Francisco', miami: 'Miami', boston: 'Boston',
+      seattle: 'Seattle', denver: 'Denver',
+      // UK
+      uk: 'United Kingdom', london: 'London', manchester: 'Manchester', edinburgh: 'Edinburgh',
+      // Europe
+      france: 'France', paris: 'Paris', germany: 'Germany', berlin: 'Berlin',
+      spain: 'Spain', madrid: 'Madrid', italy: 'Italy', rome: 'Rome',
+      netherlands: 'Netherlands', amsterdam: 'Amsterdam',
+      // Asia-Pacific
+      australia: 'Australia', sydney: 'Sydney', melbourne: 'Melbourne',
+      japan: 'Japan', tokyo: 'Tokyo', south_korea: 'South Korea', seoul: 'Seoul',
+      india: 'India', mumbai: 'Mumbai', delhi: 'Delhi',
+      china: 'China', beijing: 'Beijing', shanghai: 'Shanghai',
+      singapore: 'Singapore', hong_kong: 'Hong Kong', new_zealand: 'New Zealand',
+      // Middle East & Africa
+      uae: 'UAE', dubai: 'Dubai', israel: 'Israel', south_africa: 'South Africa',
+      nigeria: 'Nigeria', kenya: 'Kenya', egypt: 'Egypt',
+      // Latin America
+      brazil: 'Brazil', sao_paulo: 'São Paulo', mexico: 'Mexico',
+      mexico_city: 'Mexico City', argentina: 'Argentina', buenos_aires: 'Buenos Aires',
+      colombia: 'Colombia', bogota: 'Bogotá',
+      // Always-present
+      international: 'International',
+      health: 'Health & Science',
+    };
+
+    function catLabel(key) {
+      return CAT_LABELS[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // ── Preferred display order (known cats come first in this sequence) ──
+    const CAT_ORDER_PRIORITY = [
+      'canada', 'toronto', 'vancouver', 'montreal', 'calgary', 'edmonton',
+      'ottawa', 'winnipeg', 'halifax',
+      'usa', 'new_york', 'los_angeles', 'chicago', 'houston', 'washington_dc',
+      'san_francisco', 'miami', 'boston', 'seattle', 'denver',
+      'uk', 'london', 'manchester', 'edinburgh',
+      'france', 'paris', 'germany', 'berlin', 'spain', 'madrid', 'italy', 'rome',
+      'netherlands', 'amsterdam', 'australia', 'sydney', 'melbourne',
+      'japan', 'tokyo', 'south_korea', 'seoul', 'india', 'mumbai', 'delhi',
+      'china', 'beijing', 'shanghai', 'singapore', 'hong_kong', 'new_zealand',
+      'uae', 'dubai', 'israel', 'south_africa', 'nigeria', 'kenya', 'egypt',
+      'brazil', 'sao_paulo', 'mexico', 'mexico_city', 'argentina', 'buenos_aires',
+      'colombia', 'bogota',
+      'international', 'health',
+    ];
+
+    // ── Build nav buttons from actual story categories ──
+    function updateNavBar() {
+      const navBar = document.getElementById('navBar');
+      const utilityIds = new Set(['btnPhotos', 'btnReadAloud', 'btnSettings']);
+
+      // Remove old dynamic buttons
+      Array.from(navBar.querySelectorAll('button[data-cat]:not([data-cat="all"])')).forEach(b => b.remove());
+
+      // Unique categories present in stories
+      const present = [...new Set(stories.map(s => s.category))];
+      // Sort by priority order, unknowns appended alphabetically at end
+      present.sort((a, b) => {
+        const ia = CAT_ORDER_PRIORITY.indexOf(a);
+        const ib = CAT_ORDER_PRIORITY.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
+      // Insert before first utility button
+      const firstUtility = Array.from(navBar.children).find(el => utilityIds.has(el.id));
+      present.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.dataset.cat = cat;
+        btn.textContent = catLabel(cat);
+        if (cat === currentCategory) btn.classList.add('active');
+        navBar.insertBefore(btn, firstUtility);
+      });
+
+      // Ensure "All" is active if currentCategory is 'all'
+      if (currentCategory === 'all') {
+        navBar.querySelector('[data-cat="all"]')?.classList.add('active');
+      }
+    }
+
+    // ── DOM refs ──
+    const content = document.getElementById('content');
+    const dateLine = document.getElementById('dateLine');
+    const statusRight = document.getElementById('statusRight');
+    const btnRefresh = document.getElementById('btnRefresh');
+
+    // ── Date formatting ──
+    function todayStr() {
+      const d = new Date();
+      return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    }
+    function prettyDate(str) {
+      const d = new Date(str + 'T12:00:00');
+      return d.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+    function formatTimestamp(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleString('en-CA', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', hour12: true,
+          timeZoneName: 'short'
+        });
+      } catch (e) { return ''; }
+    }
+
+    // ── Fetch stories from API ──
+    async function loadStories(silent = false) {
+      if (!silent) {
+        content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading stories...</div>';
+      }
+      try {
+        const date = todayStr();
+        const url = `/api/stories?date=${date}&category=${currentCategory}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        stories = data.stories || [];
+        dateLine.textContent = prettyDate(date);
+        updateNavBar();
+        renderStories();
+        statusRight.textContent = `Last loaded: ${new Date().toLocaleTimeString()}`;
+      } catch (err) {
+        if (!silent) {
+          content.innerHTML = `<div class="empty-state">Could not load stories. Is the server running?</div>`;
+        }
+      }
+    }
+
+    // ── Render ──
+    function renderStories() {
+      if (stories.length === 0) {
+        content.innerHTML = `<div class="empty-state">
+          No stories yet for today. Stories appear after the next scheduled scrape,
+          or click ↺ Refresh (bottom-right) to trigger one now.
+        </div>`;
+        return;
+      }
+
+      // Group by category
+      const grouped = {};
+      stories.forEach(s => {
+        if (!grouped[s.category]) grouped[s.category] = [];
+        grouped[s.category].push(s);
+      });
+
+      // Build ordered category list from what's actually present
+      const presentCats = Object.keys(grouped);
+      presentCats.sort((a, b) => {
+        const ia = CAT_ORDER_PRIORITY.indexOf(a);
+        const ib = CAT_ORDER_PRIORITY.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
+      let html = '';
+      const cats = currentCategory === 'all' ? presentCats : [currentCategory];
+
+      cats.forEach(cat => {
+        const catStories = (grouped[cat] || []).slice(0, settings.storyCount);
+        if (!catStories || catStories.length === 0) return;
+
+        html += `<section class="category-section">`;
+        if (currentCategory === 'all') {
+          html += `<h2 class="category-header">${catLabel(cat)}</h2>`;
+        }
+
+        catStories.forEach((story, idx) => {
+          const sources = JSON.parse(story.sources_json || '[]');
+          const primaryLink = sources[0]?.url || '#';
+
+          // Parse bullets
+          const summaryBullets = story.summary.split('\n').filter(l => l.trim());
+          const contextBullets = story.balanced_context.split('\n').filter(l => l.trim());
+
+          const storyNum = idx + 1;
+          const timestamp = formatTimestamp(story.pub_date || story.scraped_at);
+          const timestampLabel = story.pub_date ? 'Published' : 'Scraped';
+
+          html += `<article class="story">`;
+
+          // Boxed story number
+          html += `  <div class="story-number">${storyNum}</div>`;
+
+          html += `  <div class="story-body">`;
+
+          // AI badge + read time
+          html += `    <div class="story-meta-top">`;
+          html += `      <span class="ai-badge">Balanced Summary</span>`;
+          html += `      <span class="read-time">~30 sec read</span>`;
+          html += `    </div>`;
+
+          // Photo (from RSS feed, if available)
+          if (story.image_url) {
+            const photoStyle = photosOn ? '' : ' style="display:none"';
+            html += `    <img class="story-photo" src="${esc(story.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'"${photoStyle}>`;
+          }
+
+          html += `    <div class="story-headline">${esc(story.headline)}</div>`;
+
+          // WHAT HAPPENED
+          html += `    <div class="section-label first">◼ What Happened</div>`;
+          html += `    <ul class="story-bullets">`;
+          summaryBullets.forEach(b => {
+            html += `<li>${esc(b.replace(/^[•▸\-–]\s*/, ''))}</li>`;
+          });
+          html += `    </ul>`;
+
+          // OTHER PERSPECTIVES
+          if (story.balanced_context) {
+            html += `    <div class="section-label">◼ Other Perspectives</div>`;
+            html += `    <ul class="story-context">`;
+            contextBullets.forEach(b => {
+              html += `<li>${esc(b.replace(/^[•◦\-–]\s*/, ''))}</li>`;
+            });
+            html += `    </ul>`;
+          }
+
+          // THE BOTTOM LINE
+          if (story.closing_line) {
+            html += `    <div class="bottom-line-label">◼ The Bottom Line</div>`;
+            html += `    <div class="story-closing">${esc(story.closing_line)}</div>`;
+          }
+
+          html += `    <a class="story-cta" href="${esc(primaryLink)}" target="_blank" rel="noopener">You're up-to-date. Go deeper if you really need <span style="font-style:italic; color:#e74c3c;">here</span> ✕</a>`;
+
+          html += `    <div class="story-sources">Sources: `;
+          html += sources.map(s =>
+            `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`
+          ).join(' · ');
+          html += `</div>`;
+
+          if (timestamp) {
+            html += `    <div class="story-timestamp">${timestampLabel} ${timestamp}</div>`;
+          }
+
+          html += `  </div>`; // .story-body
+          html += `</article>`;
+        });
+
+        html += `</section>`;
+      });
+
+      content.innerHTML = html;
+    }
+
+    // ── Escape HTML ──
+    function esc(s) {
+      const el = document.createElement('span');
+      el.textContent = s || '';
+      return el.innerHTML;
+    }
+
+    // ── Photo toggle ──
+    let photosOn = true;
+    const btnPhotos = document.getElementById('btnPhotos');
+    btnPhotos.addEventListener('click', () => {
+      photosOn = !photosOn;
+      btnPhotos.dataset.photos = photosOn ? 'on' : 'off';
+      btnPhotos.textContent = `📷 PHOTOS: ${photosOn ? 'ON' : 'OFF'}`;
+      // Show/hide all photo elements without re-rendering
+      document.querySelectorAll('.story-photo').forEach(img => {
+        img.style.display = photosOn ? 'block' : 'none';
+      });
+    });
+
+    // ── Text-to-speech (Chrome-bug-safe: queue one sentence at a time) ──
+    let isReading = false;
+    let readQueue = [];
+    const btnReadAloud = document.getElementById('btnReadAloud');
+    const synth = window.speechSynthesis;
+
+    function stopReading() {
+      isReading = false;
+      readQueue = [];
+      synth.cancel();
+      btnReadAloud.textContent = '🔊 READ ALOUD';
+      btnReadAloud.style.background = '#fff';
+      btnReadAloud.style.color = '#1a1a1a';
+    }
+
+    function speakNext() {
+      if (!isReading || readQueue.length === 0) {
+        stopReading();
+        statusRight.textContent = readQueue.length === 0 && isReading ? 'Done reading.' : '';
+        return;
+      }
+      const text = readQueue.shift();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 0.92;
+      utt.pitch = 1;
+      utt.volume = 1;
+      utt.onend = speakNext;
+      utt.onerror = speakNext; // skip broken chunks
+      synth.speak(utt);
+    }
+
+    btnReadAloud.addEventListener('click', () => {
+      if (isReading) {
+        stopReading();
+        statusRight.textContent = '';
+        return;
+      }
+      if (stories.length === 0) { alert('No stories loaded yet.'); return; }
+
+      isReading = true;
+      readQueue = [];
+      btnReadAloud.textContent = '⏸ STOP';
+      btnReadAloud.style.background = '#1a1a1a';
+      btnReadAloud.style.color = '#faf9f6';
+      statusRight.textContent = 'Reading aloud…';
+
+      // Build sentence queue (one sentence per utterance avoids Chrome 15s bug)
+      readQueue.push('Neutral News.');
+      stories.forEach((story, i) => {
+        readQueue.push(`Story ${i + 1}. ${story.headline}.`);
+        // Split summary bullets into individual sentences
+        story.summary.split('\n').filter(l => l.trim()).forEach(line => {
+          readQueue.push(line.replace(/^[•▸\-–]\s*/, '') + '.');
+        });
+        if (story.balanced_context) {
+          readQueue.push('Other perspectives.');
+          story.balanced_context.split('\n').filter(l => l.trim()).forEach(line => {
+            readQueue.push(line.replace(/^[•◦\-–]\s*/, '') + '.');
+          });
+        }
+        if (story.closing_line) {
+          readQueue.push('The bottom line. ' + story.closing_line);
+        }
+      });
+
+      speakNext();
+    });
+
+    // ── Settings panel ──────────────────────────────────
+    const settingsPanel  = document.getElementById('settingsPanel');
+    const settingsOverlay= document.getElementById('settingsOverlay');
+    const settingCount   = document.getElementById('settingCount');
+    const settingCountVal= document.getElementById('settingCountVal');
+
+    let sourceLibrary  = null;
+    let serverSettings = null;
+
+    // ── Accordion builder ──
+    function buildAccordion(library, srvSettings) {
+      const enabledCountries = srvSettings?.countries || [];
+      const enabledCities    = srvSettings?.cities    || (() => {
+        const def = [];
+        for (const r of library.regions) for (const c of r.countries)
+          for (const ci of (c.cities||[])) if (ci.defaultEnabled) def.push(ci.id);
+        return def;
+      })();
+
+      const accordion = document.getElementById('settingsAccordion');
+      let html = '';
+
+      for (const region of library.regions) {
+        html += `<div class="acc-region">
+          <div class="acc-region-header" data-region="${region.id}">
+            <span class="acc-arrow" id="rarr-${region.id}">▶</span>
+            ${region.label}
+          </div>
+          <div class="acc-region-body" id="rbody-${region.id}">`;
+
+        for (const country of region.countries) {
+          const countryChecked = country.alwaysEnabled || enabledCountries.includes(country.id);
+          const disabled = country.alwaysEnabled ? 'disabled title="Always included"' : '';
+          const hasCities = country.cities && country.cities.length > 0;
+
+          html += `<div class="acc-country">
+            <div class="acc-country-header">
+              <label class="acc-country-label">
+                <input type="checkbox" data-type="country" data-id="${country.id}"
+                  ${countryChecked ? 'checked' : ''} ${disabled}>
+                ${country.label}${country.alwaysEnabled ? ' <span style="font-size:0.65rem;color:#aaa;">(always on)</span>' : ''}
+              </label>
+              ${hasCities ? `<span class="acc-country-arrow" data-country="${country.id}">▶</span>` : ''}
+            </div>`;
+
+          if (hasCities) {
+            html += `<div class="acc-country-cities" id="cbody-${country.id}">`;
+            for (const city of country.cities) {
+              const cityChecked = enabledCities.includes(city.id);
+              html += `<label class="acc-city-row">
+                <input type="checkbox" data-type="city" data-id="${city.id}" ${cityChecked ? 'checked' : ''}>
+                ${city.label}
+              </label>`;
+            }
+            html += `</div>`;
+          }
+          html += `</div>`; // acc-country
+        }
+        html += `</div></div>`; // acc-region-body, acc-region
+      }
+      accordion.innerHTML = html;
+
+      // Region expand/collapse
+      accordion.querySelectorAll('.acc-region-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const id = header.dataset.region;
+          const body  = document.getElementById(`rbody-${id}`);
+          const arrow = document.getElementById(`rarr-${id}`);
+          body.classList.toggle('open');
+          arrow.classList.toggle('open');
+        });
+      });
+
+      // Country city expand/collapse (arrow only)
+      accordion.querySelectorAll('.acc-country-arrow').forEach(arrow => {
+        arrow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = arrow.dataset.country;
+          const body = document.getElementById(`cbody-${id}`);
+          body.classList.toggle('open');
+          arrow.classList.toggle('open');
+        });
+      });
+
+      // Checkbox changes → save
+      accordion.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', onSourceToggle);
+      });
+    }
+
+    function buildInfluencerSection(library, srvSettings) {
+      const enabledInfl = srvSettings?.influencers ||
+        library.influencers.filter(x => x.defaultEnabled).map(x => x.id);
+
+      const el = document.getElementById('settingsInfluencers');
+      let html = '';
+      for (const inf of library.influencers) {
+        const checked = enabledInfl.includes(inf.id) ? 'checked' : '';
+        const sourceNames = [...new Set(inf.sources.map(s => s.name))].join(' · ');
+        html += `<label class="settings-check-row">
+          <input type="checkbox" data-type="influencer" data-id="${inf.id}" ${checked}>
+          <span class="settings-check-label">
+            ${inf.label}
+            <span class="settings-check-count">${sourceNames}</span>
+          </span>
+        </label>`;
+      }
+      el.innerHTML = html;
+      el.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', onSourceToggle));
+    }
+
+    function collectSettings() {
+      const countries = [], cities = [], influencers = [];
+      document.querySelectorAll('#settingsAccordion input[data-type=country]:checked:not(:disabled)').forEach(cb => countries.push(cb.dataset.id));
+      document.querySelectorAll('#settingsAccordion input[data-type=city]:checked').forEach(cb => cities.push(cb.dataset.id));
+      document.querySelectorAll('#settingsInfluencers input[data-type=influencer]:checked').forEach(cb => influencers.push(cb.dataset.id));
+      return { storyCount: settings.storyCount, countries, cities, influencers };
+    }
+
+    async function onSourceToggle() {
+      const newSettings = collectSettings();
+      serverSettings = newSettings;
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+        });
+        statusRight.textContent = 'Settings saved — takes effect on next scrape.';
+      } catch (e) { console.warn('Could not save settings'); }
+    }
+
+    async function openSettings() {
+      settingsPanel.classList.add('open');
+      settingsOverlay.classList.add('open');
+
+      if (!sourceLibrary) {
+        try {
+          const res = await fetch('/api/settings');
+          const data = await res.json();
+          sourceLibrary  = data.library;
+          serverSettings = data.settings;
+        } catch (e) {
+          document.getElementById('settingsAccordion').innerHTML =
+            '<div style="padding:20px;color:#c00;font-size:0.8rem;">Could not load sources.</div>';
+          return;
+        }
+      }
+
+      settingCount.value    = serverSettings?.storyCount || settings.storyCount;
+      settingCountVal.textContent = settingCount.value;
+      buildAccordion(sourceLibrary, serverSettings);
+      buildInfluencerSection(sourceLibrary, serverSettings);
+    }
+
+    function closeSettings() {
+      settingsPanel.classList.remove('open');
+      settingsOverlay.classList.remove('open');
+    }
+
+    document.getElementById('btnSettings').addEventListener('click', openSettings);
+    document.getElementById('btnCloseSettings').addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', closeSettings);
+
+    settingCount.addEventListener('input', async () => {
+      settings.storyCount = parseInt(settingCount.value, 10);
+      settingCountVal.textContent = settings.storyCount;
+      saveSettings();
+      renderStories();
+      if (serverSettings) {
+        serverSettings.storyCount = settings.storyCount;
+        try {
+          await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(serverSettings),
+          });
+        } catch (e) {}
+      }
+    });
+
+    // ── Nav buttons ──
+    document.getElementById('navBar').addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      if (['btnPhotos', 'btnReadAloud', 'btnSettings'].includes(e.target.id)) return;
+      document.querySelectorAll('.nav-bar button:not(#btnPhotos):not(#btnReadAloud):not(#btnSettings)').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentCategory = e.target.dataset.cat;
+      renderStories();
+    });
+
+    // ── Manual refresh — max 3 clicks per 15-minute window ──
+    const REFRESH_MAX = 3;
+    const REFRESH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+    let refreshTimestamps = []; // array of Date.now() for each click
+    let refreshCountdown = null; // interval for countdown timer
+
+    function updateRefreshButton() {
+      const now = Date.now();
+      // Drop timestamps older than 15 min
+      refreshTimestamps = refreshTimestamps.filter(t => now - t < REFRESH_WINDOW_MS);
+      const used = refreshTimestamps.length;
+      const left = REFRESH_MAX - used;
+
+      if (left <= 0) {
+        // Find when the oldest click expires
+        const oldestExpiry = refreshTimestamps[0] + REFRESH_WINDOW_MS;
+        const secsLeft = Math.ceil((oldestExpiry - now) / 1000);
+        const mins = Math.floor(secsLeft / 60);
+        const secs = secsLeft % 60;
+        btnRefresh.disabled = true;
+        btnRefresh.textContent = `↺ (${mins}:${secs.toString().padStart(2,'0')})`;
+
+        // Start countdown if not already running
+        if (!refreshCountdown) {
+          refreshCountdown = setInterval(() => {
+            const n = Date.now();
+            refreshTimestamps = refreshTimestamps.filter(t => n - t < REFRESH_WINDOW_MS);
+            if (refreshTimestamps.length < REFRESH_MAX) {
+              clearInterval(refreshCountdown);
+              refreshCountdown = null;
+              updateRefreshButton();
+            } else {
+              const exp = refreshTimestamps[0] + REFRESH_WINDOW_MS;
+              const s = Math.ceil((exp - n) / 1000);
+              const m = Math.floor(s / 60);
+              btnRefresh.textContent = `↺ (${m}:${(s % 60).toString().padStart(2,'0')})`;
+            }
+          }, 1000);
+        }
+      } else {
+        btnRefresh.disabled = false;
+        btnRefresh.textContent = left < REFRESH_MAX ? `↺ Refresh (${left} left)` : '↺ Refresh';
+      }
+    }
+
+    btnRefresh.addEventListener('click', async () => {
+      const now = Date.now();
+      refreshTimestamps = refreshTimestamps.filter(t => now - t < REFRESH_WINDOW_MS);
+      if (refreshTimestamps.length >= REFRESH_MAX) return; // guard
+
+      refreshTimestamps.push(now);
+      updateRefreshButton();
+
+      btnRefresh.textContent = '…';
+      btnRefresh.disabled = true;
+      statusRight.textContent = 'Scrape started — stories loading as they are processed...';
+
+      try {
+        await fetch('/api/scrape', { method: 'POST' });
+      } catch (err) {
+        // Fire-and-forget — ignore network errors here
+      }
+
+      // Poll every 8 seconds for up to 8 minutes
+      let previousCount = stories.length;
+      let pollCount = 0;
+      const maxPolls = 60;
+
+      const poll = setInterval(async () => {
+        pollCount++;
+        await loadStories(true); // silent — no spinner flash
+
+        if (stories.length > previousCount) {
+          statusRight.textContent = `${stories.length} stories loaded — still processing...`;
+          previousCount = stories.length;
+        }
+
+        if (pollCount >= maxPolls) {
+          clearInterval(poll);
+          statusRight.textContent = `Done — ${stories.length} stories total`;
+          updateRefreshButton(); // restore correct state
+        }
+      }, 8000);
+    });
+
+    // ── Initial load ──
+    loadStories();
+
+    // ── Auto-refresh every 10 minutes ──
+    setInterval(() => loadStories(true), 10 * 60 * 1000);
+  </script>
+</body>
+</html>
