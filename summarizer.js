@@ -22,6 +22,7 @@ OUTPUT FORMAT (exactly these keys):
   "closingLine": "Single sentence: outcome, uncertainty, or what happens next. No engagement hook."
 }`;
 
+// ── Direct HTTPS POST to Anthropic Messages API ──
 function claudeRequest(apiKey, model, systemPrompt, userMessage) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
@@ -73,7 +74,7 @@ function claudeRequest(apiKey, model, systemPrompt, userMessage) {
   });
 }
 
-async function summarizeStory(storyGroup, categoryKey) {
+async function summarizeStory(storyGroup, categoryLabel) {
   const apiKey = config.anthropicApiKey;
   if (!apiKey) {
     throw new Error('ANTHROPIC_API_KEY not set. Add it to your Railway environment variables.');
@@ -82,8 +83,6 @@ async function summarizeStory(storyGroup, categoryKey) {
   const sourcesText = storyGroup
     .map((s, i) => `SOURCE ${i + 1}: ${s.sourceName}\nTitle: ${s.title}\nDescription: ${s.description}\nURL: ${s.link}`)
     .join('\n\n');
-
-  const categoryLabel = config.feeds[categoryKey]?.label || categoryKey;
 
   const userMessage = `Category: ${categoryLabel}
 
@@ -98,11 +97,13 @@ Summarize the above. 40-75 words max total. Return only the JSON object.`;
     userMessage
   );
 
+  // Extract text from Claude response structure
   const text = response?.content?.[0]?.text || '';
   if (!text) {
     throw new Error('Empty response from Claude');
   }
 
+  // Strip markdown fences if present
   let jsonStr = text.trim();
   if (jsonStr.startsWith('```')) {
     jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');

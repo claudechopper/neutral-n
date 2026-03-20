@@ -223,54 +223,69 @@ function buildActiveFeeds() {
     if (fs.existsSync(p)) userSettings = JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch (e) {}
 
-  const isEnabled = (section, id) => {
+  // Check if a country/city ID is in the user's saved settings (or use defaults)
+  const isCountryEnabled = (id) => {
+    if (!userSettings) return false; // non-Canada countries are off by default
+    return (userSettings.countries || []).includes(id);
+  };
+  const isCityEnabled = (id) => {
     if (!userSettings) {
-      // No saved settings — use defaults from library
-      const item = lib[section] && lib[section].find(x => x.id === id);
-      return item ? item.defaultEnabled : false;
+      // Use defaultEnabled from config
+      for (const region of lib.regions) {
+        for (const country of region.countries) {
+          const city = (country.cities || []).find(c => c.id === id);
+          if (city) return city.defaultEnabled;
+        }
+      }
+      return false;
     }
-    const list = userSettings[section] || [];
-    return list.includes(id);
+    return (userSettings.cities || []).includes(id);
+  };
+  const isInfluencerEnabled = (id) => {
+    if (!userSettings) {
+      const inf = lib.influencers.find(x => x.id === id);
+      return inf ? inf.defaultEnabled : false;
+    }
+    return (userSettings.influencers || []).includes(id);
   };
 
   const feeds = [];
+  const intlSources = []; // All non-Canada national sources pooled together
 
-  // Cities → each enabled city becomes its own category
-  for (const city of lib.cities) {
-    if (isEnabled('cities', city.id)) {
-      feeds.push({ key: city.id, label: city.label, sources: city.sources });
+  // Walk every region > country > city
+  for (const region of lib.regions) {
+    for (const country of region.countries) {
+      if (country.alwaysEnabled) {
+        // Canada: always add national feed as its own category
+        feeds.push({ key: 'canada', label: 'Canada', sources: country.nationalSources });
+      } else if (isCountryEnabled(country.id)) {
+        // Other enabled countries: pool national sources into international
+        intlSources.push(...country.nationalSources);
+      }
+
+      // Enabled cities → each gets its own scrape category
+      for (const city of (country.cities || [])) {
+        if (isCityEnabled(city.id)) {
+          feeds.push({ key: city.id, label: city.label, sources: city.sources });
+        }
+      }
     }
   }
 
-  // Canada national — always included (uses CBC, CTV, Globe national feeds)
-  feeds.push({
-    key: 'canada',
-    label: 'Canada',
-    sources: [
-      { name: 'CBC News',       url: 'https://www.cbc.ca/cmlink/rss-topstories', type: 'rss' },
-      { name: 'CTV News',       url: 'https://www.ctvnews.ca/rss/ctvnews-ca-top-stories-public-rss-1.822009', type: 'rss' },
-      { name: 'Globe and Mail', url: 'https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/', type: 'rss' },
-      { name: 'National Post',  url: 'https://nationalpost.com/feed', type: 'rss' },
-      { name: 'Global News CA', url: 'https://globalnews.ca/feed/', type: 'rss' },
-    ],
-  });
+  // Always include global wire sources (Reuters, AP, BBC, Al Jazeera) in international
+  intlSources.push(
+    { name: 'Reuters',    url: 'https://feeds.reuters.com/reuters/topNews', type: 'rss' },
+    { name: 'AP News',    url: 'https://rsshub.app/apnews/topics/apf-topnews', type: 'rss' },
+    { name: 'BBC World',  url: 'https://feeds.bbci.co.uk/news/world/rss.xml', type: 'rss' },
+    { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', type: 'rss' },
+    { name: 'NPR World',  url: 'https://feeds.npr.org/1004/rss.xml', type: 'rss' }
+  );
+  feeds.push({ key: 'international', label: 'International', sources: intlSources });
 
-  // International → pool ALL enabled regions into one category so stories
-  // cross-reference each other (e.g. Reuters vs Al Jazeera on the same event)
-  const intlSources = [];
-  for (const region of lib.international) {
-    if (isEnabled('international', region.id)) {
-      intlSources.push(...region.sources);
-    }
-  }
-  if (intlSources.length > 0) {
-    feeds.push({ key: 'international', label: 'International', sources: intlSources });
-  }
-
-  // Health influencers → pool ALL enabled influencers into one category
+  // Health influencers → pool all enabled into one category
   const healthSources = [];
   for (const inf of lib.influencers) {
-    if (isEnabled('influencers', inf.id)) {
+    if (isInfluencerEnabled(inf.id)) {
       healthSources.push(...inf.sources);
     }
   }
@@ -344,7 +359,7 @@ async function scrapeAll() {
 
     for (const group of topGroups) {
       try {
-        const summary = await summarizer.summarizeStory(group, categoryKey);
+        const summary = await summarizer.summarizeStory(group, feedEntry.label || categoryKey);
 
         if (!summary) {
           console.log(`  [WARN] Empty summary for: ${group[0].title}`);
