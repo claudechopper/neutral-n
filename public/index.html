@@ -791,17 +791,17 @@
 
           html += `  <div class="story-body">`;
 
-          // AI badge + read time
-          html += `    <div class="story-meta-top">`;
-          html += `      <span class="ai-badge">Balanced Summary</span>`;
-          html += `      <span class="read-time">~30 sec read</span>`;
-          html += `    </div>`;
-
           // Photo (from RSS feed, if available)
           if (story.image_url) {
             const photoStyle = photosOn ? '' : ' style="display:none"';
             html += `    <img class="story-photo" src="${esc(story.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'"${photoStyle}>`;
           }
+
+          // AI badge + read time
+          html += `    <div class="story-meta-top">`;
+          html += `      <span class="ai-badge">Balanced Summary</span>`;
+          html += `      <span class="read-time">~30 sec read</span>`;
+          html += `    </div>`;
 
           html += `    <div class="story-headline">${esc(story.headline)}</div>`;
 
@@ -1217,6 +1217,9 @@
 
     // ── Initial load ──
     loadStories();
+
+    // Auto-scrape on page load (fire-and-forget)
+    setTimeout(() => btnRefresh.click(), 500);
 
     // ── Auto-refresh every 10 minutes ──
     setInterval(() => loadStories(true), 10 * 60 * 1000);
