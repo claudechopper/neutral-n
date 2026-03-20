@@ -63,3 +63,4 @@ Edit `config.js` to change RSS feeds, add sources, adjust scrape times, or switc
 - **Twitter/X (@foundmyfitness)**: Uses Nitter RSS mirrors. These are community-run and may go down. If all fail, the app skips that category gracefully and logs a warning.
 - **API costs**: Each story summary uses one Google Gemini API call (~400 tokens). At 15 stories × 4 categories × 3 scrapes = ~180 calls/day max. Actual usage is lower due to deduplication. Roughly $1.50–$4.50/month.
 - **HTML scraping**: Used as fallback when RSS feeds fail. Configured per-source in `config.js` with CSS selectors.
+# Force redeploy
